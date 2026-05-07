@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#0d0d1a">
+  <title>MoneyManager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+
+    <header class="top-bar">
+      <div class="top-bar-left">
+        <button class="btn-month" id="btnPrevMonth">‹</button>
+        <span class="month-label" id="monthLabel">2026年5月</span>
+        <button class="btn-month" id="btnNextMonth">›</button>
+      </div>
+      <div class="top-bar-right">
+        <span class="month-expense-label">支出</span>
+        <span class="month-expense-value" id="monthExpense">¥0.00</span>
+      </div>
+    </header>
+
+    <main class="main-content">
+
+      <section class="form-section" id="formSection">
+        <div class="amount-group">
+          <span class="currency-sign">¥</span>
+          <input type="number" id="inputAmount" class="amount-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal" autofocus>
+        </div>
+        <div class="category-grid" id="categoryGrid"></div>
+        <div class="form-row">
+          <div class="form-field">
+            <input type="date" id="inputDate" class="form-input">
+          </div>
+          <div class="form-field">
+            <input type="text" id="inputNote" class="form-input" placeholder="备注" maxlength="20">
+          </div>
+        </div>
+        <button id="btnSubmit" class="btn-submit">
+          <span class="btn-icon">✓</span>
+          记一笔
+        </button>
+      </section>
+
+      <section class="list-section" id="listSection">
+        <div class="list-header">
+          <span class="list-title" id="listTitle">今天</span>
+          <div class="list-header-right">
+            <span class="list-count" id="listCount">0 笔</span>
+            <button class="btn-select-mode" id="btnSelectMode">选择</button>
+          </div>
+        </div>
+        <div class="list-body" id="listBody">
+          <div class="empty-list">还没有记录</div>
+        </div>
+      </section>
+
+      <section class="review-section" id="reviewSection" style="display:none">
+        <div class="review-header">
+          <span class="review-title">月度复盘</span>
+          <span class="review-period" id="reviewPeriod">2026年5月</span>
+        </div>
+        <div class="review-summary">
+          <div class="review-summary-item">
+            <span class="review-summary-label">总支出</span>
+            <span class="review-summary-value" id="reviewTotal">¥0.00</span>
+          </div>
+          <div class="review-summary-item">
+            <span class="review-summary-label">总笔数</span>
+            <span class="review-summary-value review-count" id="reviewCount">0</span>
+          </div>
+          <div class="review-summary-item">
+            <span class="review-summary-label">日均</span>
+            <span class="review-summary-value" id="reviewDailyAvg">¥0.00</span>
+          </div>
+          <div class="review-summary-item">
+            <span class="review-summary-label">单笔最高</span>
+            <span class="review-summary-value" id="reviewMax">¥0.00</span>
+          </div>
+        </div>
+        <div class="review-rank-title">分类排行</div>
+        <div class="review-rank" id="reviewRank"></div>
+        <div class="review-category-detail" id="reviewCategoryDetail" style="display:none">
+          <div class="review-category-detail-header">
+            <button class="review-category-detail-back" id="btnCategoryBack">← 返回</button>
+            <span class="review-category-detail-title" id="reviewCategoryTitle">餐饮</span>
+            <span class="review-category-detail-count" id="reviewCategoryCount">0 笔</span>
+          </div>
+          <div class="trend-section" id="trendSection">
+            <div class="trend-header">
+              <span class="trend-title">近6月趋势</span>
+            </div>
+            <canvas class="trend-canvas" id="trendCanvas" width="600" height="200"></canvas>
+          </div>
+          <div class="review-category-detail-list" id="reviewCategoryList"></div>
+        </div>
+        <div class="review-memo">
+          <div class="review-memo-header">
+            <span class="review-memo-title">月度小结</span>
+            <span class="review-memo-hint">记录本月的想法与反思</span>
+          </div>
+          <textarea class="review-memo-input" id="memoInput" placeholder="这个月花了哪些不该花的钱？下个月有什么预算计划？&#10;&#10;写下你的思考..." maxlength="500"></textarea>
+          <div class="review-memo-footer">
+            <span class="review-memo-count" id="memoCount">0/500</span>
+          </div>
+        </div>
+        <div class="review-footer">
+          <button class="btn-data-mgmt" id="btnDataMgmt">数据管理</button>
+        </div>
+      </section>
+
+    </main>
+
+    <div class="batch-bar" id="batchBar" style="display:none">
+      <span class="batch-bar-count" id="batchCount">已选 0 笔</span>
+      <div class="batch-bar-actions">
+        <button class="btn-batch" id="btnBatchInvert">反选</button>
+        <button class="btn-batch" id="btnBatchCategory">改分类</button>
+        <button class="btn-batch btn-batch-delete" id="btnBatchDelete">删除</button>
+      </div>
+    </div>
+
+    <div class="bottom-bar">
+      <button class="btn-review" id="btnReview">
+        <span class="btn-review-icon">◈</span>
+        月度复盘
+      </button>
+    </div>
+
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="edit-overlay" id="editOverlay" style="display:none">
+    <div class="edit-panel" id="editPanel">
+      <div class="edit-panel-handle"></div>
+      <div class="edit-panel-title" id="editPanelTitle">编辑账单</div>
+      <div class="edit-panel-body">
+        <div class="edit-field-group">
+          <div class="amount-group">
+            <span class="currency-sign">¥</span>
+            <input type="number" id="editAmount" class="amount-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+          </div>
+        </div>
+        <div class="category-grid" id="editCategoryGrid"></div>
+        <div class="edit-field-group">
+          <div class="form-row">
+            <div class="form-field">
+              <input type="date" id="editDate" class="form-input">
+            </div>
+            <div class="form-field">
+              <input type="text" id="editNote" class="form-input" placeholder="备注" maxlength="20">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="edit-panel-actions">
+        <button class="btn-edit-delete" id="btnEditDelete">删除</button>
+        <button class="btn-edit-save" id="btnEditSave">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="data-overlay" id="dataOverlay" style="display:none">
+    <div class="data-panel">
+      <div class="data-panel-handle"></div>
+      <div class="data-panel-title">数据管理</div>
+      <div class="data-panel-body">
+        <button class="btn-data-action" id="btnClearMonth">
+          <span class="data-action-label">清除本月数据</span>
+          <span class="data-action-desc" id="clearMonthDesc">删除 2026年5月 的所有账单</span>
+        </button>
+        <button class="btn-data-action btn-data-action-danger" id="btnClearAll">
+          <span class="data-action-label">清除所有数据</span>
+          <span class="data-action-desc">删除全部账单，恢复初始状态</span>
+        </button>
+      </div>
+      <div class="data-panel-actions">
+        <button class="btn-data-cancel" id="btnDataCancel">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
