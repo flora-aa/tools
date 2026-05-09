@@ -1,10 +1,9 @@
-const CATEGORIES = {
-  expense: ['餐饮', '购物', '交通', '娱乐', '住房', '通讯', '医疗', '教育', '其他'],
-  income: ['工资', '奖金', '兼职', '投资', '红包', '其他']
-};
+const CATEGORIES = ['餐饮', '购物', '交通', '娱乐', '住房', '通讯', '医疗', '教育', '退款', '其他'];
+
+const MAX_TOTAL = 100000000; // 10000w
 
 let transactions = [];
-let currentType = 'expense';
+let currentSubType = 'expense';
 let currentYear = 0;
 let currentMonth = 0;
 let selectedCategory = '';
@@ -17,6 +16,11 @@ function loadData() {
   if (data) {
     try {
       transactions = JSON.parse(data);
+      transactions.forEach(t => {
+        if (!t.subType) {
+          t.subType = t.type === 'income' ? 'refund' : 'expense';
+        }
+      });
     } catch {
       transactions = [];
     }
@@ -74,7 +78,7 @@ function showToast(message) {
 
 function populateCategories() {
   const grid = document.getElementById('categoryGrid');
-  const categories = CATEGORIES[currentType];
+  const categories = CATEGORIES;
 
   if (!selectedCategory || !categories.includes(selectedCategory)) {
     selectedCategory = categories[0];
@@ -104,6 +108,151 @@ function initMonth() {
   currentMonth = now.getMonth() + 1;
 }
 
+let calActiveSource = null; // 'input' or 'edit'
+let calYear = 0;
+let calMonth = 0;
+let calSelectedDate = '';
+
+function formatDateDisplay(dateStr) {
+  if (!dateStr) return '';
+  const [y, m, d] = dateStr.split('-');
+  return `${y}/${parseInt(m)}/${parseInt(d)}`;
+}
+
+function updateDateDisplay() {
+  document.getElementById('dateDisplay').textContent = formatDateDisplay(selectedDate);
+}
+
+function openCalendar(source) {
+  calActiveSource = source;
+  const currentDate = source === 'edit'
+    ? document.getElementById('editDateDisplay').dataset.date || selectedDate
+    : selectedDate;
+  const [y, m, d] = currentDate.split('-').map(Number);
+  calYear = y;
+  calMonth = m;
+  calSelectedDate = currentDate;
+  renderCalendar();
+  document.getElementById('calendarOverlay').style.display = 'flex';
+}
+
+function closeCalendar() {
+  document.getElementById('calendarOverlay').style.display = 'none';
+  calActiveSource = null;
+}
+
+function renderCalendar() {
+  document.getElementById('calTitle').textContent = `${calYear}年${calMonth}月`;
+
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = '';
+
+  const firstDay = new Date(calYear, calMonth - 1, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+  const daysInPrev = new Date(calYear, calMonth - 1, 0).getDate();
+
+  const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+
+  for (let i = 0; i < startOffset; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'cal-day other-month';
+    btn.textContent = daysInPrev - startOffset + 1 + i;
+    btn.disabled = true;
+    grid.appendChild(btn);
+  }
+
+  const todayStr = getTodayDate();
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const btn = document.createElement('button');
+    btn.className = 'cal-day';
+    btn.textContent = d;
+
+    const dateStr = `${calYear}-${String(calMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+    if (dateStr === todayStr) btn.classList.add('today');
+    if (dateStr === calSelectedDate) btn.classList.add('selected');
+
+    btn.dataset.date = dateStr;
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.cal-day.selected').forEach(el => el.classList.remove('selected'));
+      btn.classList.add('selected');
+      calSelectedDate = dateStr;
+    });
+
+    grid.appendChild(btn);
+  }
+
+  const totalCells = startOffset + daysInMonth;
+  const remaining = (7 - (totalCells % 7)) % 7;
+  for (let i = 1; i <= remaining; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'cal-day other-month';
+    btn.textContent = i;
+    btn.disabled = true;
+    grid.appendChild(btn);
+  }
+}
+
+function confirmCalendar() {
+  if (!calSelectedDate) return;
+
+  if (calActiveSource === 'edit') {
+    const display = document.getElementById('editDateDisplay');
+    display.textContent = formatDateDisplay(calSelectedDate);
+    display.dataset.date = calSelectedDate;
+  } else {
+    selectedDate = calSelectedDate;
+    updateDateDisplay();
+    if (!isReviewMode) renderList();
+  }
+
+  closeCalendar();
+}
+
+function calGoToday() {
+  const today = getTodayDate();
+  const [y, m, d] = today.split('-').map(Number);
+  calYear = y;
+  calMonth = m;
+  calSelectedDate = today;
+  renderCalendar();
+}
+
+function calPrevMonth() {
+  if (calMonth === 1) {
+    calYear--;
+    calMonth = 12;
+  } else {
+    calMonth--;
+  }
+  const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+  const [y, m, d] = calSelectedDate.split('-').map(Number);
+  if (d > daysInMonth) {
+    calSelectedDate = `${calYear}-${String(calMonth).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
+  } else {
+    calSelectedDate = `${calYear}-${String(calMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  }
+  renderCalendar();
+}
+
+function calNextMonth() {
+  if (calMonth === 12) {
+    calYear++;
+    calMonth = 1;
+  } else {
+    calMonth++;
+  }
+  const daysInMonth = new Date(calYear, calMonth, 0).getDate();
+  const [y, m, d] = calSelectedDate.split('-').map(Number);
+  if (d > daysInMonth) {
+    calSelectedDate = `${calYear}-${String(calMonth).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
+  } else {
+    calSelectedDate = `${calYear}-${String(calMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  }
+  renderCalendar();
+}
+
 function updateMonthLabel() {
   document.getElementById('monthLabel').textContent = `${currentYear}年${currentMonth}月`;
 }
@@ -111,19 +260,25 @@ function updateMonthLabel() {
 function getMonthTransactions() {
   return transactions.filter(t => {
     const d = new Date(t.date);
-    return d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth && t.type === 'expense';
+    return d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth
+      && (t.subType === 'expense' || t.subType === 'advance');
   });
 }
 
 function updateMonthExpense() {
   const monthTx = getMonthTransactions();
-  const total = monthTx.reduce((sum, t) => sum + Number(t.amount), 0);
-  document.getElementById('monthExpense').textContent = formatAmount(total);
+  const refunds = transactions.filter(t => {
+    const d = new Date(t.date);
+    return d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth && t.subType === 'refund';
+  });
+  const total = monthTx.reduce((sum, t) => sum + Number(t.amount), 0)
+    - refunds.reduce((sum, t) => sum + Number(t.amount), 0);
+  document.getElementById('monthExpense').textContent = formatAmount(Math.max(0, total));
 }
 
 function getSelectedDateTransactions() {
   return transactions
-    .filter(t => t.date === selectedDate && t.type === 'expense')
+    .filter(t => t.date === selectedDate)
     .sort((a, b) => b.createdAt - a.createdAt);
 }
 
@@ -151,16 +306,22 @@ function renderList() {
 
   container.innerHTML = listTx.map(t => {
     const checked = selectedIds.has(t.id) ? 'checking' : '';
+    const isRefund = t.subType === 'refund';
+    const isAdvance = t.subType === 'advance';
+    const typeTag = isRefund ? '<span class="list-item-tag tag-refund">退款</span>'
+      : isAdvance ? '<span class="list-item-tag tag-advance">垫付</span>' : '';
+    const amountClass = isRefund ? 'list-item-amount refund' : 'list-item-amount';
+    const amountSign = isRefund ? '+' : '-';
     return `
       <div class="list-item ${checked} ${isSelectMode ? 'selectable' : ''}" data-id="${t.id}">
         <div class="list-item-check">✓</div>
         <div class="list-item-info">
-          <div class="list-item-category">${t.category}</div>
+          <div class="list-item-category">${t.category}${typeTag}</div>
           ${t.note ? `<div class="list-item-note">${escapeHtml(t.note)}</div>` : ''}
         </div>
         <div class="list-item-right">
           <div>
-            <div class="list-item-amount">-${formatAmount(t.amount).slice(1)}</div>
+            <div class="${amountClass}">${amountSign}${formatAmount(t.amount).slice(1)}</div>
             <div class="list-item-time">${getTimeFromTimestamp(t.createdAt)}</div>
           </div>
         </div>
@@ -209,18 +370,27 @@ function updateMemoCount() {
 
 function renderReview() {
   const monthTx = getMonthTransactions();
+  const monthRefunds = transactions.filter(t => {
+    const d = new Date(t.date);
+    return d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth && t.subType === 'refund';
+  });
 
   document.getElementById('reviewPeriod').textContent = `${currentYear}年${currentMonth}月`;
 
-  const total = monthTx.reduce((sum, t) => sum + Number(t.amount), 0);
-  document.getElementById('reviewTotal').textContent = formatAmount(total);
-  document.getElementById('reviewCount').textContent = monthTx.length;
+  loadMemo();
+
+  const totalExpense = monthTx.reduce((sum, t) => sum + Number(t.amount), 0);
+  const totalRefund = monthRefunds.reduce((sum, t) => sum + Number(t.amount), 0);
+  const netTotal = Math.max(0, totalExpense - totalRefund);
+  document.getElementById('reviewTotal').textContent = formatAmount(netTotal);
+  document.getElementById('reviewCount').textContent = monthTx.length + monthRefunds.length;
 
   const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
-  const dailyAvg = monthTx.length > 0 ? total / daysInMonth : 0;
+  const dailyAvg = monthTx.length > 0 ? netTotal / daysInMonth : 0;
   document.getElementById('reviewDailyAvg').textContent = formatAmount(dailyAvg);
 
-  const maxAmount = monthTx.length > 0 ? Math.max(...monthTx.map(t => Number(t.amount))) : 0;
+  const allMonthTx = [...monthTx, ...monthRefunds];
+  const maxAmount = allMonthTx.length > 0 ? Math.max(...allMonthTx.map(t => Number(t.amount))) : 0;
   document.getElementById('reviewMax').textContent = formatAmount(maxAmount);
 
   const container = document.getElementById('reviewRank');
@@ -249,7 +419,8 @@ function renderReview() {
 
   const prevTx = transactions.filter(t => {
     const d = new Date(t.date);
-    return d.getFullYear() === prevYear && (d.getMonth() + 1) === prevMonth && t.type === 'expense';
+    return d.getFullYear() === prevYear && (d.getMonth() + 1) === prevMonth
+      && (t.subType === 'expense' || t.subType === 'advance');
   });
 
   const prevGrouped = {};
@@ -309,8 +480,6 @@ function renderReview() {
       showCategoryDetail(el.dataset.category);
     });
   });
-
-  loadMemo();
 }
 
 function showCategoryDetail(category) {
@@ -331,15 +500,23 @@ function showCategoryDetail(category) {
     return;
   }
 
-  container.innerHTML = filtered.map(t => `
+  container.innerHTML = filtered.map(t => {
+    const isRefund = t.subType === 'refund';
+    const isAdvance = t.subType === 'advance';
+    const typeTag = isRefund ? '<span class="list-item-tag tag-refund">退款</span>'
+      : isAdvance ? '<span class="list-item-tag tag-advance">垫付</span>' : '';
+    const amountClass = isRefund ? 'review-category-item-amount refund' : 'review-category-item-amount';
+    const amountSign = isRefund ? '+' : '-';
+    return `
     <div class="review-category-item" data-id="${t.id}">
       <div class="review-category-item-info">
-        <div class="review-category-item-date">${t.date}</div>
+        <div class="review-category-item-date">${t.date}${typeTag}</div>
         ${t.note ? `<div class="review-category-item-note">${escapeHtml(t.note)}</div>` : ''}
       </div>
-      <div class="review-category-item-amount">-${formatAmount(t.amount).slice(1)}</div>
+      <div class="${amountClass}">${amountSign}${formatAmount(t.amount).slice(1)}</div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   drawTrend(category);
 
@@ -375,7 +552,7 @@ function drawTrend(category) {
     const tx = transactions.filter(t => {
       const d = new Date(t.date);
       return d.getFullYear() === year && (d.getMonth() + 1) === month
-        && t.type === 'expense' && t.category === category;
+        && (t.subType === 'expense' || t.subType === 'advance') && t.category === category;
     });
     return {
       label: `${month}月`,
@@ -477,6 +654,7 @@ function toggleReview() {
   const listSection = document.getElementById('listSection');
   const reviewSection = document.getElementById('reviewSection');
   const btnReview = document.getElementById('btnReview');
+  const btnTopReview = document.getElementById('btnTopReview');
 
   if (isReviewMode) {
     if (isSelectMode) toggleSelectMode();
@@ -485,6 +663,7 @@ function toggleReview() {
     reviewSection.style.display = '';
     btnReview.classList.add('active');
     btnReview.innerHTML = '<span class="btn-review-icon">◈</span> 返回记账';
+    btnTopReview.classList.add('active');
     renderReview();
   } else {
     formSection.style.display = '';
@@ -492,6 +671,7 @@ function toggleReview() {
     reviewSection.style.display = 'none';
     btnReview.classList.remove('active');
     btnReview.innerHTML = '<span class="btn-review-icon">◈</span> 月度复盘';
+    btnTopReview.classList.remove('active');
   }
 }
 
@@ -509,6 +689,16 @@ function refreshAll() {
   }
 }
 
+function getTotalExpense() {
+  const expense = transactions
+    .filter(t => t.subType === 'expense' || t.subType === 'advance')
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+  const refund = transactions
+    .filter(t => t.subType === 'refund')
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+  return Math.max(0, expense - refund);
+}
+
 function syncDateToCurrentMonth() {
   const today = getTodayDate();
   const [y, m] = today.split('-').map(Number);
@@ -521,13 +711,12 @@ function syncDateToCurrentMonth() {
   }
 
   selectedDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${targetDay}`;
-  document.getElementById('inputDate').value = selectedDate;
+  updateDateDisplay();
 }
 
 function addTransaction() {
   const amountInput = document.getElementById('inputAmount');
   const noteInput = document.getElementById('inputNote');
-  const dateInput = document.getElementById('inputDate');
 
   const amount = parseFloat(amountInput.value);
   if (!amount || amount <= 0) {
@@ -538,21 +727,37 @@ function addTransaction() {
     return;
   }
 
+  const isAdvance = document.getElementById('advanceToggle').checked;
+
+  const currentTotal = getTotalExpense();
+  if (currentTotal + amount > MAX_TOTAL) {
+    showToast('累计支出已达上限，请先清除部分数据');
+    amountInput.focus();
+    return;
+  }
+
+  const date = selectedDate;
+
   const transaction = {
     id: generateId(),
-    type: currentType,
+    subType: currentSubType,
     amount: amount,
     category: selectedCategory,
     note: noteInput.value.trim(),
-    date: dateInput.value || getTodayDate(),
+    date: date,
     createdAt: Date.now()
   };
+
+  if (selectedCategory === '退款') {
+    transaction.subType = 'refund';
+  } else if (isAdvance) {
+    transaction.subType = 'advance';
+  }
 
   transactions.push(transaction);
   saveData();
 
-  selectedDate = transaction.date;
-  dateInput.value = selectedDate;
+  selectedDate = date;
 
   amountInput.value = '';
   noteInput.value = '';
@@ -608,10 +813,16 @@ function openEditPanel(id) {
   editingId = id;
 
   document.getElementById('editAmount').value = tx.amount;
-  document.getElementById('editDate').value = tx.date;
+  const editDisplay = document.getElementById('editDateDisplay');
+  editDisplay.textContent = formatDateDisplay(tx.date);
+  editDisplay.dataset.date = tx.date;
   document.getElementById('editNote').value = tx.note || '';
 
   populateEditCategories(tx.category);
+
+  document.querySelectorAll('#editSubTypeGroup .subtype-btn').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.subtype === (tx.subType || 'expense'));
+  });
 
   document.getElementById('editOverlay').style.display = '';
   document.getElementById('editAmount').focus();
@@ -629,11 +840,19 @@ function restoreEditPanel() {
   saveBtn.onclick = saveEdit;
   document.getElementById('editPanelTitle').textContent = '编辑账单';
   document.querySelectorAll('.edit-field-group').forEach(el => el.style.display = '');
+  const amountGroup = document.querySelector('.edit-panel-body .amount-group');
+  if (amountGroup) amountGroup.style.display = '';
+  const categoryGrid = document.getElementById('editCategoryGrid');
+  if (categoryGrid) categoryGrid.style.display = '';
+  const noteField = document.querySelector('.form-field:last-child');
+  if (noteField) noteField.style.display = '';
+  const subTypeGroup = document.getElementById('editSubTypeGroup');
+  if (subTypeGroup) subTypeGroup.style.display = '';
 }
 
 function populateEditCategories(selected) {
   const grid = document.getElementById('editCategoryGrid');
-  const categories = CATEGORIES.expense;
+  const categories = CATEGORIES;
 
   grid.innerHTML = categories.map(c => {
     const isSelected = c === selected;
@@ -654,7 +873,7 @@ function populateEditCategories(selected) {
 
 function getEditSelectedCategory() {
   const selected = document.querySelector('#editCategoryGrid .cat-btn.selected');
-  return selected ? selected.dataset.category : CATEGORIES.expense[0];
+  return selected ? selected.dataset.category : CATEGORIES[0];
 }
 
 function saveEdit() {
@@ -669,9 +888,17 @@ function saveEdit() {
     return;
   }
 
+  const currentTotal = getTotalExpense();
+  const otherTotal = currentTotal - tx.amount;
+  if (otherTotal + amount > MAX_TOTAL) {
+    showToast('修改后累计支出将超出上限');
+    return;
+  }
+
   const category = getEditSelectedCategory();
-  const date = document.getElementById('editDate').value;
+  const date = document.getElementById('editDateDisplay').dataset.date || tx.date;
   const note = document.getElementById('editNote').value.trim();
+  const subType = document.querySelector('#editSubTypeGroup .subtype-btn.selected')?.dataset.subtype || tx.subType;
 
   const oldDate = tx.date;
   const oldCategory = tx.category;
@@ -680,6 +907,7 @@ function saveEdit() {
   tx.category = category;
   tx.date = date;
   tx.note = note;
+  tx.subType = subType;
 
   saveData();
   closeEditPanel();
@@ -694,6 +922,9 @@ function saveEdit() {
 
   refreshAll();
 
+  selectedDate = date;
+  updateDateDisplay();
+
   if (monthChanged) {
     const d = new Date(date);
     showToast(`已更新，该记录已移至${d.getFullYear()}年${d.getMonth() + 1}月`);
@@ -702,11 +933,6 @@ function saveEdit() {
     if (detail.style.display !== 'none') {
       hideCategoryDetail();
     }
-  }
-
-  if (!isReviewMode) {
-    selectedDate = date;
-    document.getElementById('inputDate').value = date;
   }
 }
 
@@ -875,7 +1101,7 @@ function batchChangeCategory() {
     return;
   }
 
-  const categories = CATEGORIES.expense;
+  const categories = CATEGORIES;
   const container = document.getElementById('editCategoryGrid');
   container.innerHTML = categories.map(c => `
     <button class="cat-btn" data-category="${c}">
@@ -892,6 +1118,8 @@ function batchChangeCategory() {
   container.querySelector('.cat-btn').classList.add('selected');
 
   document.querySelectorAll('.edit-field-group').forEach(el => el.style.display = 'none');
+  const subTypeGroup = document.getElementById('editSubTypeGroup');
+  if (subTypeGroup) subTypeGroup.style.display = 'none';
   document.getElementById('editPanelTitle').textContent = '批量改分类';
 
   const saveBtn = document.getElementById('btnEditSave');
@@ -919,9 +1147,65 @@ function batchChangeCategory() {
   document.getElementById('editOverlay').style.display = '';
 }
 
+function batchChangeDate() {
+  if (selectedIds.size === 0) {
+    showToast('请先选择账单');
+    return;
+  }
+
+  const overlay = document.getElementById('editOverlay');
+  document.getElementById('editPanelTitle').textContent = '修改日期';
+  document.getElementById('editAmount').value = '';
+  document.getElementById('editNote').value = '';
+  document.getElementById('editCategoryGrid').innerHTML = '';
+  const editDisplay = document.getElementById('editDateDisplay');
+  editDisplay.textContent = formatDateDisplay(getTodayDate());
+  editDisplay.dataset.date = getTodayDate();
+
+  const amountGroup = document.querySelector('.edit-panel-body .amount-group');
+  if (amountGroup) amountGroup.style.display = 'none';
+  const categoryGrid = document.getElementById('editCategoryGrid');
+  if (categoryGrid) categoryGrid.style.display = 'none';
+  const noteField = document.querySelector('.form-field:last-child');
+  if (noteField) noteField.style.display = 'none';
+  const subTypeGroup = document.getElementById('editSubTypeGroup');
+  if (subTypeGroup) subTypeGroup.style.display = 'none';
+
+  const saveBtn = document.getElementById('btnEditSave');
+  saveBtn.textContent = '确认修改';
+  saveBtn.onclick = () => {
+    const newDate = document.getElementById('editDateDisplay').dataset.date;
+    transactions.forEach(t => {
+      if (selectedIds.has(t.id)) {
+        t.date = newDate;
+      }
+    });
+    saveData();
+    closeEditPanel();
+    selectedIds.clear();
+    showToast('日期已更新');
+    if (isSelectMode) toggleSelectMode();
+    refreshAll();
+  };
+
+  overlay.style.display = '';
+}
+
 function openDataPanel() {
   document.getElementById('clearMonthDesc').textContent =
     `删除 ${currentYear}年${currentMonth}月 的所有账单`;
+
+  const total = getTotalExpense();
+  const el = document.getElementById('dataTotalExpense');
+  el.textContent = formatAmount(total);
+  const summary = document.getElementById('dataSummary');
+  if (total >= MAX_TOTAL) {
+    summary.classList.add('mega');
+    summary.classList.add('maxed');
+  } else {
+    summary.classList.remove('mega', 'maxed');
+  }
+
   document.getElementById('dataOverlay').style.display = '';
 }
 
@@ -933,7 +1217,7 @@ function clearCurrentMonth() {
   const before = transactions.length;
   transactions = transactions.filter(t => {
     const d = new Date(t.date);
-    return !(d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth && t.type === 'expense');
+    return !(d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth);
   });
   const count = before - transactions.length;
   if (count === 0) {
@@ -950,6 +1234,14 @@ function clearCurrentMonth() {
 function clearAllData() {
   transactions = [];
   saveData();
+  const keysToRemove = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('mm_memo_')) {
+      keysToRemove.push(key);
+    }
+  }
+  keysToRemove.forEach(key => localStorage.removeItem(key));
   closeDataPanel();
   showToast('已清除所有数据');
   refreshAll();
@@ -961,27 +1253,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const today = getTodayDate();
   selectedDate = today;
+  updateDateDisplay();
 
-  const dateInput = document.getElementById('inputDate');
-  dateInput.value = today;
-
-  dateInput.addEventListener('change', () => {
-    if (dateInput.value) {
-      selectedDate = dateInput.value;
-      if (!isReviewMode) renderList();
-    }
+  document.getElementById('dateTrigger').addEventListener('click', () => openCalendar('input'));
+  document.getElementById('editDateTrigger').addEventListener('click', () => openCalendar('edit'));
+  document.getElementById('calendarOverlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeCalendar();
   });
+  document.getElementById('calPrevMonth').addEventListener('click', calPrevMonth);
+  document.getElementById('calNextMonth').addEventListener('click', calNextMonth);
+  document.getElementById('calToday').addEventListener('click', calGoToday);
+  document.getElementById('calConfirm').addEventListener('click', confirmCalendar);
 
   document.getElementById('btnSubmit').addEventListener('click', addTransaction);
   document.getElementById('btnPrevMonth').addEventListener('click', () => { saveMemo(); prevMonth(); });
   document.getElementById('btnNextMonth').addEventListener('click', () => { saveMemo(); nextMonth(); });
   document.getElementById('btnReview').addEventListener('click', toggleReview);
+  document.getElementById('btnTopReview').addEventListener('click', toggleReview);
 
   document.getElementById('btnCategoryBack').addEventListener('click', hideCategoryDetail);
 
   document.getElementById('btnSelectMode').addEventListener('click', toggleSelectMode);
   document.getElementById('btnBatchDelete').addEventListener('click', batchDelete);
   document.getElementById('btnBatchCategory').addEventListener('click', batchChangeCategory);
+  document.getElementById('btnBatchDate').addEventListener('click', batchChangeDate);
   document.getElementById('btnBatchInvert').addEventListener('click', batchInvert);
 
   document.getElementById('btnEditSave').addEventListener('click', saveEdit);
@@ -991,6 +1286,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('editAmount').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') saveEdit();
+  });
+
+  document.querySelectorAll('#editSubTypeGroup .subtype-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#editSubTypeGroup .subtype-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
   });
 
   document.getElementById('btnDataMgmt').addEventListener('click', openDataPanel);
@@ -1015,7 +1317,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const memoInput = document.getElementById('memoInput');
   if (memoInput) {
-    memoInput.addEventListener('input', updateMemoCount);
+    memoInput.addEventListener('input', () => {
+      updateMemoCount();
+      saveMemo();
+    });
   }
 
   populateCategories();
