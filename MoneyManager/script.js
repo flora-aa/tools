@@ -19,12 +19,102 @@ const ALL_OVERLAYS = [
   'budgetOverlay', 'calendarOverlay', 'themeOverlay'
 ];
 
+/* ========== Overlay 滑动手势关闭 ========== */
+
+function initOverlaySwipe(overlayEl) {
+  const panel = overlayEl.querySelector('.panel');
+  if (!panel) return;
+
+  const isPanelModal = overlayEl.classList.contains('panel-modal');
+  if (isPanelModal) return;
+
+  let startY = 0;
+  let currentY = 0;
+  let isDragging = false;
+  let panelHeight = 0;
+
+  const onTouchStart = (e) => {
+    const touch = e.touches[0];
+    startY = touch.clientY;
+    currentY = startY;
+    isDragging = false;
+    panelHeight = panel.offsetHeight;
+  };
+
+  const onTouchMove = (e) => {
+    const touch = e.touches[0];
+    const deltaY = touch.clientY - startY;
+
+    if (!isDragging) {
+      if (deltaY > 10) {
+        isDragging = true;
+        panel.style.transition = 'none';
+        panel.style.animation = 'none';
+      } else {
+        return;
+      }
+    }
+
+    currentY = touch.clientY;
+    const moveDelta = currentY - startY;
+
+    if (moveDelta > 0) {
+      const damped = Math.min(moveDelta * 0.5, panelHeight * 0.4);
+      panel.style.transform = `translateY(${damped}px)`;
+      overlayEl.style.background = `rgba(0, 0, 0, ${Math.max(0, 0.6 - moveDelta / panelHeight * 0.6)})`;
+    }
+  };
+
+  const onTouchEnd = () => {
+    if (!isDragging) return;
+
+    const moveDelta = currentY - startY;
+    const threshold = panelHeight * 0.25;
+
+    panel.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+
+    if (moveDelta > threshold) {
+      panel.style.transform = `translateY(${panelHeight}px)`;
+      overlayEl.style.transition = 'background 0.3s ease';
+      overlayEl.style.background = 'rgba(0, 0, 0, 0)';
+      setTimeout(() => {
+        overlayEl.style.display = 'none';
+        overlayEl.style.transition = '';
+        panel.style.transition = '';
+        panel.style.transform = '';
+        panel.style.animation = '';
+        overlayEl.style.background = '';
+        document.body.classList.remove('overlay-open');
+      }, 300);
+    } else {
+      panel.style.transform = 'translateY(0)';
+      overlayEl.style.transition = 'background 0.3s ease';
+      overlayEl.style.background = '';
+      setTimeout(() => {
+        panel.style.transition = '';
+        panel.style.transform = '';
+        panel.style.animation = '';
+        overlayEl.style.transition = '';
+        overlayEl.style.background = '';
+      }, 300);
+    }
+
+    isDragging = false;
+  };
+
+  panel.addEventListener('touchstart', onTouchStart, { passive: true });
+  panel.addEventListener('touchmove', onTouchMove, { passive: true });
+  panel.addEventListener('touchend', onTouchEnd, { passive: true });
+  panel.addEventListener('touchcancel', onTouchEnd, { passive: true });
+}
+
 function closeAllOverlays() {
   ALL_OVERLAYS.forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
   activeOverlay = null;
+  document.body.classList.remove('overlay-open');
 }
 
 function openOverlay(id) {
@@ -34,6 +124,8 @@ function openOverlay(id) {
   if (el) {
     el.style.display = '';
     activeOverlay = id;
+    document.body.classList.add('overlay-open');
+    initOverlaySwipe(el);
   }
 }
 

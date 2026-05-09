@@ -420,6 +420,10 @@
   animation: fadeIn 0.2s ease;
 }
 
+body.overlay-open .app {
+  overflow: hidden;
+}
+
 /* 居中模态框 */
 .overlay.panel-modal {
   align-items: center;
@@ -432,6 +436,14 @@
   padding: 16px 20px 24px;
   animation: slideUp 0.3s ease;
   max-height: 45vh;
+  will-change: transform;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.panel::-webkit-scrollbar {
+  display: none;
 }
 
 /* 模态框样式（居中显示） */
@@ -1921,10 +1933,6 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator {
   gap: 8px;
 }
 
-#budgetOverviewToggle .review-card-arrow {
-  flex: 1;
-}
-
 #budgetOverviewToggle .btn-ghost {
   margin-left: auto;
 }
@@ -1937,16 +1945,6 @@ input[type="date"].form-input::-webkit-calendar-picker-indicator {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-primary);
-}
-
-.review-card-arrow {
-  font-size: 10px;
-  color: var(--text-muted);
-  transition: transform 0.2s ease;
-}
-
-.review-card.collapsed .review-card-arrow {
-  transform: rotate(-90deg);
 }
 
 .review-card-body {
