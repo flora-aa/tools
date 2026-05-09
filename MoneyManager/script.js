@@ -1,8 +1,156 @@
 const CATEGORIES = ['餐饮', '购物', '交通', '娱乐', '住房', '通讯', '医疗', '教育', '退款', '其他'];
 
-const MAX_TOTAL = 100000000; // 10000w
+const MAX_TOTAL = 100000000;
+
+const THEME_PRESETS = [
+  { name: '经典紫', accent: '#5a5aff', bg: '#0d0d1a', expense: '#ff4757', income: '#2ecc71' },
+  { name: '商务蓝', accent: '#007aff', bg: '#0a1628', expense: '#ff453a', income: '#34c759' },
+  { name: '森林绿', accent: '#34c759', bg: '#0a1f14', expense: '#ff6b6b', income: '#4ecdc4' },
+  { name: '暖阳橙', accent: '#ff9500', bg: '#1a1208', expense: '#ff4757', income: '#2ecc71' },
+  { name: '极简灰', accent: '#8e8e93', bg: '#1a1a1a', expense: '#ff453a', income: '#30d158' },
+  { name: '玫瑰粉', accent: '#ff2d55', bg: '#1a0a10', expense: '#ff6b6b', income: '#4ecdc4' },
+  { name: '日间模式', accent: '#5a5aff', bg: '#f5f5fa', expense: '#e74c3c', income: '#27ae60' },
+  { name: '护眼绿', accent: '#2ecc71', bg: '#e8f5e9', expense: '#e74c3c', income: '#27ae60' },
+];
+
+let activeOverlay = null;
+const ALL_OVERLAYS = [
+  'quickOverlay', 'editOverlay', 'dataOverlay',
+  'budgetOverlay', 'calendarOverlay', 'themeOverlay'
+];
+
+function closeAllOverlays() {
+  ALL_OVERLAYS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  activeOverlay = null;
+}
+
+function openOverlay(id) {
+  if (activeOverlay === id) return;
+  closeAllOverlays();
+  const el = document.getElementById(id);
+  if (el) {
+    el.style.display = '';
+    activeOverlay = id;
+  }
+}
+
+let themePreview = null;
+let originalTheme = null;
+
+function updateThemeColorBtn(btnId, color) {
+  const btn = document.getElementById(btnId);
+  btn.style.background = color;
+  btn.style.color = getPureContrastColor(color);
+}
+
+function initThemePanel() {
+  document.getElementById('btnTheme').addEventListener('click', () => {
+    openOverlay('themeOverlay');
+    const saved = localStorage.getItem('mm_theme');
+    const currentTheme = saved ? JSON.parse(saved) : THEME_PRESETS[0];
+    document.getElementById('themeAccent').value = currentTheme.accent;
+    document.getElementById('themeBg').value = currentTheme.bg;
+    document.getElementById('themeExpense').value = currentTheme.expense;
+    document.getElementById('themeIncome').value = currentTheme.income;
+    updateThemeColorBtn('themeAccentBtn', currentTheme.accent);
+    updateThemeColorBtn('themeBgBtn', currentTheme.bg);
+    updateThemeColorBtn('themeExpenseBtn', currentTheme.expense);
+    updateThemeColorBtn('themeIncomeBtn', currentTheme.income);
+    originalTheme = { ...currentTheme };
+    themePreview = { ...currentTheme };
+    renderThemePresets();
+    renderThemePreview();
+  });
+
+  document.getElementById('btnThemeClose').addEventListener('click', () => {
+    if (originalTheme) {
+      applyTheme(originalTheme);
+    }
+    themePreview = null;
+    originalTheme = null;
+    closeAllOverlays();
+  });
+
+  document.getElementById('themeOverlay').addEventListener('click', (e) => {
+    if (e.target.id === 'themeOverlay') {
+      if (originalTheme) {
+        applyTheme(originalTheme);
+      }
+      themePreview = null;
+      originalTheme = null;
+      closeAllOverlays();
+    }
+  });
+
+  document.getElementById('btnThemeApply').addEventListener('click', () => {
+    if (themePreview) {
+      applyTheme(themePreview);
+      localStorage.setItem('mm_theme', JSON.stringify(themePreview));
+    }
+    themePreview = null;
+    originalTheme = null;
+    closeAllOverlays();
+  });
+
+  const accentInput = document.getElementById('themeAccent');
+  const bgInput = document.getElementById('themeBg');
+  const expenseInput = document.getElementById('themeExpense');
+  const incomeInput = document.getElementById('themeIncome');
+
+  const updateThemePreview = () => {
+    themePreview = {
+      accent: accentInput.value,
+      bg: bgInput.value,
+      expense: expenseInput.value,
+      income: incomeInput.value
+    };
+    updateThemeColorBtn('themeAccentBtn', themePreview.accent);
+    updateThemeColorBtn('themeBgBtn', themePreview.bg);
+    updateThemeColorBtn('themeExpenseBtn', themePreview.expense);
+    updateThemeColorBtn('themeIncomeBtn', themePreview.income);
+    renderThemePreview();
+    renderThemePresets();
+  };
+
+  accentInput.addEventListener('input', updateThemePreview);
+  bgInput.addEventListener('input', updateThemePreview);
+  expenseInput.addEventListener('input', updateThemePreview);
+  incomeInput.addEventListener('input', updateThemePreview);
+}
+
+function renderThemePreview() {
+  const container = document.getElementById('themeCustomPreview');
+  if (!themePreview) return;
+
+  const saved = localStorage.getItem('mm_theme');
+  const currentTheme = saved ? JSON.parse(saved) : THEME_PRESETS[0];
+  const isCustom = themePreview.accent !== currentTheme.accent ||
+                   themePreview.bg !== currentTheme.bg ||
+                   themePreview.expense !== currentTheme.expense ||
+                   themePreview.income !== currentTheme.income;
+
+  if (isCustom) {
+    container.innerHTML = `
+      <div class="theme-preset active custom" data-type="custom">
+        <div class="theme-preset-preview" style="background: ${themePreview.bg}">
+          <div class="theme-preset-accent" style="background: ${themePreview.accent}"></div>
+          <div class="theme-preset-expense" style="background: ${themePreview.expense}"></div>
+          <div class="theme-preset-income" style="background: ${themePreview.income}"></div>
+        </div>
+        <span class="theme-preset-name">自定义方案</span>
+      </div>
+    `;
+    container.style.display = '';
+  } else {
+    container.style.display = 'none';
+  }
+}
 
 let transactions = [];
+
 let currentSubType = 'expense';
 let currentYear = 0;
 let currentMonth = 0;
@@ -25,6 +173,206 @@ function loadData() {
       transactions = [];
     }
   }
+  loadTheme();
+}
+
+function loadTheme() {
+  const saved = localStorage.getItem('mm_theme');
+  if (saved) {
+    try {
+      const theme = JSON.parse(saved);
+      applyTheme(theme);
+    } catch {
+      applyTheme(THEME_PRESETS[0]);
+    }
+  } else {
+    applyTheme(THEME_PRESETS[0]);
+  }
+}
+
+function saveTheme() {
+  const root = document.documentElement;
+  const theme = {
+    accent: getComputedStyle(root).getPropertyValue('--accent').trim(),
+    bg: getComputedStyle(root).getPropertyValue('--bg-primary').trim(),
+    expense: getComputedStyle(root).getPropertyValue('--color-expense').trim(),
+    income: getComputedStyle(root).getPropertyValue('--color-income').trim(),
+    btnTopReviewColor: getComputedStyle(root).getPropertyValue('--btn-top-review-color').trim()
+  };
+  localStorage.setItem('mm_theme', JSON.stringify(theme));
+}
+
+function getLuminance(hex) {
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function getContrastColor(bgHex) {
+  const luminance = getLuminance(bgHex);
+  return luminance > 0.4 ? '#3c3c43' : '#e8eaed';
+}
+
+function getPureContrastColor(bgHex) {
+  const luminance = getLuminance(bgHex);
+  return luminance > 0.4 ? '#000000' : '#ffffff';
+}
+
+function getSecondaryColor(bgHex) {
+  const luminance = getLuminance(bgHex);
+  return luminance > 0.4 ? '#636366' : '#a1a1a6';
+}
+
+function getMutedColor(bgHex) {
+  const luminance = getLuminance(bgHex);
+  return luminance > 0.4 ? '#8e8e93' : '#636366';
+}
+
+function getDisabledColor(bgHex) {
+  const luminance = getLuminance(bgHex);
+  return luminance > 0.4 ? '#c7c7cc' : '#48484a';
+}
+
+function lighten(hex, percent) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const amount = Math.round(2.55 * percent);
+  return `#${Math.min(255, r + amount).toString(16).padStart(2, '0')}${Math.min(255, g + amount).toString(16).padStart(2, '0')}${Math.min(255, b + amount).toString(16).padStart(2, '0')}`;
+}
+
+function darken(hex, percent) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  const amount = Math.round(2.55 * percent);
+  return `#${Math.max(0, r - amount).toString(16).padStart(2, '0')}${Math.max(0, g - amount).toString(16).padStart(2, '0')}${Math.max(0, b - amount).toString(16).padStart(2, '0')}`;
+}
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  const bg = theme.bg || '#0d0d1a';
+  const accent = theme.accent || '#5a5aff';
+  const expense = theme.expense || lighten(accent, 30);
+  const income = theme.income || '#27ae60';
+  const textColor = getContrastColor(bg);
+  const secondaryColor = getSecondaryColor(bg);
+  const mutedColor = getMutedColor(bg);
+  const disabledColor = getDisabledColor(bg);
+
+  const luminance = getLuminance(bg);
+  const isLight = luminance > 0.4;
+
+  const cardBg = isLight ? darken(bg, 5) : lighten(bg, 8);
+  const cardAltBg = isLight ? darken(bg, 8) : lighten(bg, 15);
+  const inputBg = isLight ? lighten(bg, 3) : darken(bg, 8);
+  const borderColor = isLight ? darken(bg, 15) : lighten(bg, 20);
+
+  const shadowAlpha = isLight ? 0.1 : 0.3;
+  const shadowCard = isLight
+    ? `0 2px 8px rgba(0, 0, 0, ${shadowAlpha})`
+    : `0 4px 20px rgba(0, 0, 0, ${shadowAlpha})`;
+  const shadowDropdown = `0 8px 24px rgba(0, 0, 0, ${shadowAlpha + 0.1})`;
+  const shadowModal = `0 16px 48px rgba(0, 0, 0, ${shadowAlpha + 0.2})`;
+
+  let btnTopReviewColor = theme.btnTopReviewColor;
+  if (!btnTopReviewColor) {
+    const accentLuminance = getLuminance(accent);
+    const bgLuminance = getLuminance(bg);
+    const midLuminance = (accentLuminance + bgLuminance) / 2;
+    btnTopReviewColor = midLuminance > 0.5
+      ? darken(textColor, 30)
+      : lighten(textColor, 30);
+  }
+
+  root.style.setProperty('--bg-primary', bg);
+  root.style.setProperty('--bg-card', cardBg);
+  root.style.setProperty('--bg-card-alt', cardAltBg);
+  root.style.setProperty('--bg-input', inputBg);
+  root.style.setProperty('--bg-hover', isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.03)');
+  root.style.setProperty('--bg-active', isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.06)');
+
+  root.style.setProperty('--text-primary', textColor);
+  root.style.setProperty('--text-secondary', secondaryColor);
+  root.style.setProperty('--text-muted', mutedColor);
+  root.style.setProperty('--text-disabled', disabledColor);
+
+  root.style.setProperty('--border-color', borderColor);
+  root.style.setProperty('--border-focus', accent);
+
+  root.style.setProperty('--shadow-card', shadowCard);
+  root.style.setProperty('--shadow-dropdown', shadowDropdown);
+  root.style.setProperty('--shadow-modal', shadowModal);
+
+  root.style.setProperty('--accent', accent);
+  root.style.setProperty('--accent-hover', lighten(accent, 15));
+  root.style.setProperty('--accent-text', getContrastColor(accent));
+  root.style.setProperty('--accent-alpha-10', hexToRgba(accent, 0.10));
+  root.style.setProperty('--accent-alpha-15', hexToRgba(accent, 0.15));
+  root.style.setProperty('--accent-alpha-20', hexToRgba(accent, 0.20));
+  root.style.setProperty('--accent-alpha-25', hexToRgba(accent, 0.25));
+  root.style.setProperty('--btn-top-review-color', btnTopReviewColor);
+
+  const warn = '#ffc107';
+
+  root.style.setProperty('--color-expense', expense);
+  root.style.setProperty('--color-expense-alpha-12', hexToRgba(expense, 0.12));
+  root.style.setProperty('--color-expense-alpha-25', hexToRgba(expense, 0.25));
+  root.style.setProperty('--color-income', income);
+  root.style.setProperty('--color-income-alpha-12', hexToRgba(income, 0.12));
+  root.style.setProperty('--color-income-alpha-15', hexToRgba(income, 0.15));
+  root.style.setProperty('--color-income-alpha-25', hexToRgba(income, 0.25));
+  root.style.setProperty('--color-warn', warn);
+  root.style.setProperty('--color-warn-alpha-25', hexToRgba(warn, 0.25));
+  root.style.setProperty('--color-great', '#34c759');
+
+  saveTheme();
+}
+
+function hexToRgba(hex, alpha) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function renderThemePresets() {
+  const container = document.getElementById('themePresets');
+  const previewTheme = themePreview || (() => {
+    const saved = localStorage.getItem('mm_theme');
+    return saved ? JSON.parse(saved) : THEME_PRESETS[0];
+  })();
+
+  container.innerHTML = THEME_PRESETS.map(preset => `
+    <div class="theme-preset ${preset.accent === previewTheme.accent && preset.bg === previewTheme.bg && preset.expense === previewTheme.expense && preset.income === previewTheme.income ? 'active' : ''}" data-preset="${preset.name}">
+      <div class="theme-preset-preview" style="background: ${preset.bg}">
+        <div class="theme-preset-accent" style="background: ${preset.accent}"></div>
+        <div class="theme-preset-expense" style="background: ${preset.expense}"></div>
+        <div class="theme-preset-income" style="background: ${preset.income}"></div>
+      </div>
+      <span class="theme-preset-name">${preset.name}</span>
+    </div>
+  `).join('');
+
+  container.querySelectorAll('.theme-preset').forEach(el => {
+    el.addEventListener('click', () => {
+      const preset = THEME_PRESETS.find(p => p.name === el.dataset.preset);
+      if (preset) {
+        document.getElementById('themeAccent').value = preset.accent;
+        document.getElementById('themeBg').value = preset.bg;
+        document.getElementById('themeExpense').value = preset.expense;
+        document.getElementById('themeIncome').value = preset.income;
+        updateThemeColorBtn('themeAccentBtn', preset.accent);
+        updateThemeColorBtn('themeBgBtn', preset.bg);
+        updateThemeColorBtn('themeExpenseBtn', preset.expense);
+        updateThemeColorBtn('themeIncomeBtn', preset.income);
+        themePreview = { ...preset };
+        renderThemePresets();
+        renderThemePreview();
+      }
+    });
+  });
 }
 
 function saveData() {
@@ -125,19 +473,22 @@ function updateDateDisplay() {
 
 function openCalendar(source) {
   calActiveSource = source;
-  const currentDate = source === 'edit'
-    ? document.getElementById('editDateDisplay').dataset.date || selectedDate
-    : selectedDate;
+  let currentDate;
+  if (source === 'edit') {
+    currentDate = document.getElementById('editDateDisplay').dataset.date || selectedDate;
+  } else {
+    currentDate = selectedDate;
+  }
   const [y, m, d] = currentDate.split('-').map(Number);
-  calYear = y;
-  calMonth = m;
+  calYear = currentYear;
+  calMonth = currentMonth;
   calSelectedDate = currentDate;
   renderCalendar();
-  document.getElementById('calendarOverlay').style.display = 'flex';
+  openOverlay('calendarOverlay');
 }
 
 function closeCalendar() {
-  document.getElementById('calendarOverlay').style.display = 'none';
+  closeAllOverlays();
   calActiveSource = null;
 }
 
@@ -202,9 +553,17 @@ function confirmCalendar() {
     display.textContent = formatDateDisplay(calSelectedDate);
     display.dataset.date = calSelectedDate;
   } else {
-    selectedDate = calSelectedDate;
-    updateDateDisplay();
-    if (!isReviewMode) renderList();
+    const [y, m] = calSelectedDate.split('-').map(Number);
+    if (y !== currentYear || m !== currentMonth) {
+      currentYear = y;
+      currentMonth = m;
+      syncDateToCurrentMonth();
+      refreshAll();
+    } else {
+      selectedDate = calSelectedDate;
+      updateDateDisplay();
+      renderList();
+    }
   }
 
   closeCalendar();
@@ -212,9 +571,8 @@ function confirmCalendar() {
 
 function calGoToday() {
   const today = getTodayDate();
-  const [y, m, d] = today.split('-').map(Number);
-  calYear = y;
-  calMonth = m;
+  calYear = currentYear;
+  calMonth = currentMonth;
   calSelectedDate = today;
   renderCalendar();
 }
@@ -282,6 +640,27 @@ function getSelectedDateTransactions() {
     .sort((a, b) => b.createdAt - a.createdAt);
 }
 
+function getSelectedDateExpense() {
+  const listTx = getSelectedDateTransactions();
+  const expense = listTx
+    .filter(t => t.subType === 'expense' || t.subType === 'advance')
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+  const refund = listTx
+    .filter(t => t.subType === 'refund')
+    .reduce((sum, t) => sum + Number(t.amount), 0);
+  return Math.max(0, expense - refund);
+}
+
+function updateListDayExpense() {
+  const total = getSelectedDateExpense();
+  const el = document.getElementById('listDayExpense');
+  if (total > 0) {
+    el.textContent = formatAmount(total);
+  } else {
+    el.textContent = '';
+  }
+}
+
 function formatDateLabel(dateStr) {
   const today = getTodayDate();
   if (dateStr === today) return '今天';
@@ -296,8 +675,11 @@ function renderList() {
   const container = document.getElementById('listBody');
   const listTx = getSelectedDateTransactions();
 
+  renderSelectedDateBudget();
+
   document.getElementById('listTitle').textContent = formatDateLabel(selectedDate);
   document.getElementById('listCount').textContent = `${listTx.length} 笔`;
+  updateListDayExpense();
 
   if (listTx.length === 0) {
     container.innerHTML = '<div class="empty-list">还没有记录</div>';
@@ -369,19 +751,24 @@ function updateMemoCount() {
 }
 
 function renderReview() {
+  loadMemo();
+  renderReviewSummary();
+  renderReviewRank();
+  renderBudgetOverview();
+  renderDayBudgetList();
+}
+
+function renderReviewSummary() {
   const monthTx = getMonthTransactions();
   const monthRefunds = transactions.filter(t => {
     const d = new Date(t.date);
     return d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth && t.subType === 'refund';
   });
 
-  document.getElementById('reviewPeriod').textContent = `${currentYear}年${currentMonth}月`;
-
-  loadMemo();
-
   const totalExpense = monthTx.reduce((sum, t) => sum + Number(t.amount), 0);
   const totalRefund = monthRefunds.reduce((sum, t) => sum + Number(t.amount), 0);
   const netTotal = Math.max(0, totalExpense - totalRefund);
+
   document.getElementById('reviewTotal').textContent = formatAmount(netTotal);
   document.getElementById('reviewCount').textContent = monthTx.length + monthRefunds.length;
 
@@ -392,8 +779,12 @@ function renderReview() {
   const allMonthTx = [...monthTx, ...monthRefunds];
   const maxAmount = allMonthTx.length > 0 ? Math.max(...allMonthTx.map(t => Number(t.amount))) : 0;
   document.getElementById('reviewMax').textContent = formatAmount(maxAmount);
+}
 
+function renderReviewRank() {
+  const monthTx = getMonthTransactions();
   const container = document.getElementById('reviewRank');
+
   if (monthTx.length === 0) {
     container.innerHTML = '<div class="empty-list">暂无数据</div>';
     return;
@@ -646,6 +1037,7 @@ function drawTrend(category) {
 function hideCategoryDetail() {
   document.getElementById('reviewRank').style.display = '';
   document.getElementById('reviewCategoryDetail').style.display = 'none';
+  renderReviewRank();
 }
 
 function toggleReview() {
@@ -653,25 +1045,44 @@ function toggleReview() {
   const formSection = document.getElementById('formSection');
   const listSection = document.getElementById('listSection');
   const reviewSection = document.getElementById('reviewSection');
-  const btnReview = document.getElementById('btnReview');
   const btnTopReview = document.getElementById('btnTopReview');
+  const pageWrapper = document.getElementById('pageWrapper');
+  const appContainer = document.querySelector('.app');
+  const isWideScreen = window.innerWidth >= 768;
 
   if (isReviewMode) {
     if (isSelectMode) toggleSelectMode();
-    formSection.style.display = 'none';
-    listSection.style.display = 'none';
-    reviewSection.style.display = '';
-    btnReview.classList.add('active');
-    btnReview.innerHTML = '<span class="btn-review-icon">◈</span> 返回记账';
     btnTopReview.classList.add('active');
     renderReview();
+    if (isWideScreen) {
+      pageWrapper.classList.add('dual-page');
+      appContainer.classList.add('dual-mode');
+      document.body.classList.add('dual-mode');
+      formSection.style.display = '';
+      listSection.style.display = '';
+      reviewSection.style.display = '';
+    } else {
+      formSection.style.display = 'none';
+      listSection.style.display = 'none';
+      reviewSection.style.display = '';
+    }
   } else {
+    btnTopReview.classList.remove('active');
+    if (isWideScreen) {
+      pageWrapper.classList.remove('dual-page');
+      appContainer.classList.remove('dual-mode');
+      document.body.classList.remove('dual-mode');
+      setTimeout(() => {
+        reviewSection.style.display = 'none';
+      }, 300);
+    } else {
+      pageWrapper.classList.remove('dual-page');
+      appContainer.classList.remove('dual-mode');
+      document.body.classList.remove('dual-mode');
+      reviewSection.style.display = 'none';
+    }
     formSection.style.display = '';
     listSection.style.display = '';
-    reviewSection.style.display = 'none';
-    btnReview.classList.remove('active');
-    btnReview.innerHTML = '<span class="btn-review-icon">◈</span> 月度复盘';
-    btnTopReview.classList.remove('active');
   }
 }
 
@@ -680,10 +1091,11 @@ function refreshAll() {
   updateMonthExpense();
   if (isReviewMode) {
     const detail = document.getElementById('reviewCategoryDetail');
-    if (detail.style.display !== 'none') {
+    if (detail && detail.style.display !== 'none') {
       hideCategoryDetail();
     }
     renderReview();
+    renderList();
   } else {
     renderList();
   }
@@ -712,6 +1124,12 @@ function syncDateToCurrentMonth() {
 
   selectedDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${targetDay}`;
   updateDateDisplay();
+
+  const editDateDisplay = document.getElementById('editDateDisplay');
+  if (editDateDisplay) {
+    editDateDisplay.textContent = formatDateDisplay(selectedDate);
+    editDateDisplay.dataset.date = selectedDate;
+  }
 }
 
 function addTransaction() {
@@ -756,6 +1174,7 @@ function addTransaction() {
 
   transactions.push(transaction);
   saveData();
+  setLastAmount(selectedCategory, amount);
 
   selectedDate = date;
 
@@ -804,6 +1223,490 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function getLastAmounts() {
+  try {
+    const data = localStorage.getItem('mm_lastAmounts');
+    return data ? JSON.parse(data) : {};
+  } catch {
+    return {};
+  }
+}
+
+function setLastAmount(category, amount) {
+  const lastAmounts = getLastAmounts();
+  lastAmounts[category] = amount;
+  localStorage.setItem('mm_lastAmounts', JSON.stringify(lastAmounts));
+}
+
+let quickSelectedCategory = null;
+
+function openQuickPanel() {
+  quickSelectedCategory = null;
+  renderQuickCategories();
+  document.getElementById('quickAmountDisplay').textContent = '0.00';
+  openOverlay('quickOverlay');
+}
+
+function closeQuickPanel() {
+  closeAllOverlays();
+  quickSelectedCategory = null;
+}
+
+function renderQuickCategories() {
+  const grid = document.getElementById('quickCategoryGrid');
+  const lastAmounts = getLastAmounts();
+
+  grid.innerHTML = CATEGORIES.map(c => {
+    const amount = lastAmounts[c] || 0;
+    const isSelected = c === quickSelectedCategory;
+    const displayAmount = amount > 0 ? formatAmount(amount) : '';
+    return `
+      <button class="quick-cat-btn ${isSelected ? 'selected' : ''}" data-category="${c}">
+        <span class="quick-cat-name">${c}</span>
+        ${displayAmount ? `<span class="quick-cat-amount">${displayAmount}</span>` : ''}
+      </button>
+    `;
+  }).join('');
+
+  grid.querySelectorAll('.quick-cat-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      quickSelectedCategory = btn.dataset.category;
+      const lastAmounts = getLastAmounts();
+      const amount = lastAmounts[quickSelectedCategory] || 0;
+      document.getElementById('quickAmountDisplay').textContent = amount > 0 ? amount.toFixed(2) : '0.00';
+      renderQuickCategories();
+      quickSubmit();
+    });
+  });
+}
+
+function quickSubmit() {
+  if (!quickSelectedCategory) return;
+
+  const lastAmounts = getLastAmounts();
+  let amount = lastAmounts[quickSelectedCategory] || 0;
+
+  if (amount <= 0) return;
+
+  const currentTotal = getTotalExpense();
+  if (currentTotal + amount > MAX_TOTAL) {
+    showToast('累计支出已达上限');
+    return;
+  }
+
+  const transaction = {
+    id: generateId(),
+    subType: quickSelectedCategory === '退款' ? 'refund' : 'expense',
+    amount: amount,
+    category: quickSelectedCategory,
+    note: '',
+    date: selectedDate,
+    createdAt: Date.now()
+  };
+
+  transactions.push(transaction);
+  saveData();
+
+  showToast(`已记录 ${formatAmount(amount)}`);
+
+  closeQuickPanel();
+  refreshAll();
+}
+
+function getDailyExpenses() {
+  const dailyData = {};
+  const monthTx = transactions.filter(t => {
+    const d = new Date(t.date);
+    return d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth
+      && (t.subType === 'expense' || t.subType === 'advance');
+  });
+  const monthRefunds = transactions.filter(t => {
+    const d = new Date(t.date);
+    return d.getFullYear() === currentYear && (d.getMonth() + 1) === currentMonth && t.subType === 'refund';
+  });
+
+  monthTx.forEach(t => {
+    if (!dailyData[t.date]) dailyData[t.date] = 0;
+    dailyData[t.date] += Number(t.amount);
+  });
+  monthRefunds.forEach(t => {
+    if (!dailyData[t.date]) dailyData[t.date] = 0;
+    dailyData[t.date] -= Number(t.amount);
+  });
+
+  return dailyData;
+}
+
+function getDayHeatLevel(dailyBudget, actualSpent) {
+  if (dailyBudget <= 0 || actualSpent <= 0) return 0;
+  const ratio = actualSpent / dailyBudget;
+  if (ratio <= 0.5) return 1;
+  if (ratio <= 0.75) return 2;
+  if (ratio <= 1.0) return 3;
+  return 4;
+}
+
+function getBudgetKey(year, month) {
+  return `${year}-${String(month).padStart(2, '0')}`;
+}
+
+function getBudgets() {
+  try {
+    const data = localStorage.getItem('mm_budgets');
+    return data ? JSON.parse(data) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveBudgets(budgets) {
+  localStorage.setItem('mm_budgets', JSON.stringify(budgets));
+}
+
+function getBudget(year, month) {
+  const budgets = getBudgets();
+  const key = getBudgetKey(year, month);
+  return budgets[key] || null;
+}
+
+function setBudget(year, month, config) {
+  const budgets = getBudgets();
+  const key = getBudgetKey(year, month);
+  budgets[key] = config;
+  saveBudgets(budgets);
+}
+
+function deleteBudget(year, month) {
+  const budgets = getBudgets();
+  const key = getBudgetKey(year, month);
+  delete budgets[key];
+  saveBudgets(budgets);
+}
+
+function getEffectiveBudget(year, month) {
+  const budget = getBudget(year, month);
+  if (!budget) return 0;
+  return budget.amount || 0;
+}
+
+function getBudgetExcludeIds(year, month) {
+  const budget = getBudget(year, month);
+  return budget?.excludeIds || [];
+}
+
+function getDayActualSpent(year, month, day) {
+  const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const excludeIds = getBudgetExcludeIds(year, month);
+
+  const dayTx = transactions.filter(t => {
+    if (t.date !== dateStr) return false;
+    if (t.subType === 'refund') return false;
+    if (excludeIds.includes(t.id)) return false;
+    return t.subType === 'expense' || t.subType === 'advance';
+  });
+
+  const refunds = transactions.filter(t => {
+    if (t.date !== dateStr) return false;
+    if (t.subType !== 'refund') return false;
+    if (excludeIds.includes(t.id)) return false;
+    return true;
+  });
+
+  const spent = dayTx.reduce((sum, t) => sum + Number(t.amount), 0);
+  const refund = refunds.reduce((sum, t) => sum + Number(t.amount), 0);
+  return Math.max(0, spent - refund);
+}
+
+function getSpentTillDate(year, month, day) {
+  let total = 0;
+  for (let d = 1; d < day; d++) {
+    total += getDayActualSpent(year, month, d);
+  }
+  return total;
+}
+
+function getDailyBudget(year, month, day) {
+  const effectiveBudget = getEffectiveBudget(year, month);
+  if (effectiveBudget <= 0) return 0;
+
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const spentTillYesterday = getSpentTillDate(year, month, day);
+  const remaining = effectiveBudget - spentTillYesterday;
+  const remainingDays = daysInMonth - day + 1;
+
+  return Math.max(0, remaining / remainingDays);
+}
+
+function getDayStatus(budget, actual) {
+  if (actual === 0) return 'EMPTY';
+  if (budget <= 0) return 'EMPTY';
+  const ratio = actual / budget;
+  if (ratio <= 0.8) return 'GREAT';
+  if (ratio <= 1.1) return 'GOOD';
+  if (ratio <= 1.5) return 'WARN';
+  return 'OVER';
+}
+
+function getDayStatusLabel(status) {
+  const labels = {
+    'EMPTY': { text: '—', class: 'empty' },
+    'GREAT': { text: '🎉 GoodJob!', class: 'great' },
+    'GOOD': { text: '✓ Good', class: 'good' },
+    'WARN': { text: '⚠️ ComeOn', class: 'warn' },
+    'OVER': { text: '💸 Over', class: 'over' }
+  };
+  return labels[status] || labels['EMPTY'];
+}
+
+function getBudgetMonthSpent(year, month) {
+  const daysInMonth = new Date(year, month, 0).getDate();
+  let total = 0;
+  for (let d = 1; d <= daysInMonth; d++) {
+    total += getDayActualSpent(year, month, d);
+  }
+  return total;
+}
+
+function openBudgetPanel(year, month) {
+  const budget = getBudget(currentYear, currentMonth);
+
+  if (budget) {
+    document.getElementById('inputBudgetAmount').value = budget.amount || '';
+    document.getElementById('inputBudgetTarget').value = budget.target || '';
+    document.querySelector(`input[name="workMode"][value="${budget.workMode || 'double'}"]`).checked = true;
+    document.getElementById('btnBudgetDelete').style.display = '';
+  } else {
+    document.getElementById('inputBudgetAmount').value = '';
+    document.getElementById('inputBudgetTarget').value = '';
+    document.querySelector('input[name="workMode"][value="double"]').checked = true;
+    document.getElementById('btnBudgetDelete').style.display = 'none';
+  }
+
+  openOverlay('budgetOverlay');
+}
+
+function closeBudgetPanel() {
+  closeAllOverlays();
+}
+
+function saveBudget() {
+  const amountStr = document.getElementById('inputBudgetAmount').value.trim();
+  const amount = amountStr ? parseFloat(amountStr) : 0;
+  const target = document.getElementById('inputBudgetTarget').value.trim();
+  const workMode = document.querySelector('input[name="workMode"]:checked').value;
+
+  if (amount < 0) {
+    showToast('预算金额不能为负数');
+    return;
+  }
+
+  setBudget(currentYear, currentMonth, {
+    amount,
+    target,
+    workMode,
+    excludeIds: getBudget(currentYear, currentMonth)?.excludeIds || []
+  });
+
+  closeBudgetPanel();
+  showToast(amount > 0 ? '预算已保存' : '预算已清除');
+  refreshAll();
+}
+
+function deleteBudgetConfig() {
+  if (!confirm(`确定删除 ${currentYear}年${currentMonth}月 的预算吗？`)) {
+    return;
+  }
+
+  deleteBudget(currentYear, currentMonth);
+  closeBudgetPanel();
+  showToast('预算已删除');
+  refreshAll();
+}
+
+function renderBudgetOverview() {
+  const budget = getBudget(currentYear, currentMonth);
+  const effectiveBudget = getEffectiveBudget(currentYear, currentMonth);
+  const spent = getBudgetMonthSpent(currentYear, currentMonth);
+  const remaining = Math.max(0, effectiveBudget - spent);
+
+  const today = new Date();
+  const isCurrentMonth = today.getFullYear() === currentYear && (today.getMonth() + 1) === currentMonth;
+  const todayDay = isCurrentMonth ? today.getDate() : 0;
+  const todayDailyBudget = isCurrentMonth ? getDailyBudget(currentYear, currentMonth, todayDay) : 0;
+  const todaySpent = isCurrentMonth ? getDayActualSpent(currentYear, currentMonth, todayDay) : 0;
+
+  const budgetCard = document.getElementById('budgetOverviewCard');
+  const budgetBody = document.getElementById('budgetOverviewBody');
+
+  if (effectiveBudget <= 0) {
+    budgetCard?.classList.add('collapsible');
+    budgetCard?.classList.add('collapsed');
+    if (budgetBody) budgetBody.style.display = 'none';
+  } else {
+    budgetCard?.classList.add('collapsible');
+    budgetCard?.classList.remove('collapsed');
+    if (budgetBody) budgetBody.style.display = '';
+  }
+
+  document.getElementById('budgetAmount').textContent = effectiveBudget > 0 ? formatAmount(effectiveBudget) : '未设置';
+  document.getElementById('budgetSpent').textContent = formatAmount(spent);
+  document.getElementById('budgetRemaining').textContent = formatAmount(remaining);
+
+  const progressPercent = effectiveBudget > 0 ? Math.min(100, (spent / effectiveBudget) * 100) : 0;
+  document.getElementById('budgetProgressBar').style.width = `${progressPercent}%`;
+
+  const todayStatusEl = document.getElementById('budgetTodayStatus');
+  if (effectiveBudget > 0 && isCurrentMonth) {
+    document.getElementById('budgetTodayValue').textContent = formatAmount(todayDailyBudget);
+    const status = getDayStatus(todayDailyBudget, todaySpent);
+    const statusInfo = getDayStatusLabel(status);
+    todayStatusEl.textContent = statusInfo.text;
+    todayStatusEl.className = 'budget-today-status ' + statusInfo.class;
+  } else {
+    document.getElementById('budgetTodayValue').textContent = '—';
+    todayStatusEl.textContent = '';
+    todayStatusEl.className = 'budget-today-status';
+  }
+
+  const targetEl = document.getElementById('budgetTarget');
+  const targetValueEl = document.getElementById('budgetTargetValue');
+  if (budget?.target) {
+    targetEl.style.display = '';
+    targetValueEl.textContent = budget.target;
+  } else {
+    targetEl.style.display = 'none';
+  }
+}
+
+function toggleBudgetOverview() {
+  const budgetCard = document.getElementById('budgetOverviewCard');
+  const budgetBody = document.getElementById('budgetOverviewBody');
+  if (!budgetCard || !budgetBody) return;
+
+  const isCollapsed = budgetCard.classList.contains('collapsed');
+  if (isCollapsed) {
+    budgetBody.style.display = '';
+    budgetCard.classList.remove('collapsed');
+  } else {
+    budgetBody.style.display = 'none';
+    budgetCard.classList.add('collapsed');
+  }
+}
+
+function renderSelectedDateBudget() {
+  const [year, month, day] = selectedDate.split('-').map(Number);
+
+  const effectiveBudget = getEffectiveBudget(year, month);
+
+  let dateBudget = 0;
+  let dateSpent = getDayActualSpent(year, month, day);
+
+  if (effectiveBudget > 0) {
+    dateBudget = getDailyBudget(year, month, day);
+  }
+
+  const status = getDayStatus(dateBudget, dateSpent);
+  const statusInfo = getDayStatusLabel(status);
+
+  document.getElementById('todayBudgetValue').textContent = effectiveBudget > 0 ? formatAmount(dateBudget) : '—';
+  document.getElementById('todayBudgetSpent').textContent = formatAmount(dateSpent);
+
+  const statusEl = document.getElementById('todayBudgetStatus');
+  statusEl.textContent = effectiveBudget > 0 ? statusInfo.text : '';
+  statusEl.className = 'today-budget-status ' + statusInfo.class;
+}
+
+function renderDayBudgetList() {
+  const container = document.getElementById('dayBudgetList');
+  const today = getTodayDate();
+  const daysInMonth = new Date(currentYear, currentMonth, 0).getDate();
+
+  const effectiveBudget = getEffectiveBudget(currentYear, currentMonth);
+  const hasBudget = effectiveBudget > 0;
+
+  const todayDate = new Date();
+  const isCurrentMonth = todayDate.getFullYear() === currentYear && (todayDate.getMonth() + 1) === currentMonth;
+
+  let html = '';
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const isToday = dateStr === today;
+    const isFuture = dateStr > today;
+
+    const dailyBudget = hasBudget ? getDailyBudget(currentYear, currentMonth, d) : 0;
+    const actualSpent = isFuture ? 0 : getDayActualSpent(currentYear, currentMonth, d);
+
+    let status = 'EMPTY';
+    if (!isFuture && actualSpent > 0) {
+      status = getDayStatus(dailyBudget, actualSpent);
+    }
+
+    const statusInfo = getDayStatusLabel(status);
+    const isOver = status === 'OVER' || (actualSpent > dailyBudget && dailyBudget > 0);
+    const heatLevel = hasBudget ? getDayHeatLevel(dailyBudget, actualSpent) : 0;
+
+    const barWidth = dailyBudget > 0 ? Math.min(100, (actualSpent / dailyBudget) * 100) : 0;
+
+    html += `
+      <div class="day-budget-row ${isToday ? 'today' : ''} ${isFuture ? 'future' : ''} heat-${heatLevel}" data-date="${dateStr}">
+        <span class="day-budget-date">${d}</span>
+        <div class="day-budget-bar-bg">
+          <div class="day-budget-bar ${isOver ? 'over' : ''}" style="width: ${barWidth}%"></div>
+        </div>
+        <span class="day-budget-actual ${isOver ? 'over' : ''}">${isFuture ? '—' : formatAmount(actualSpent)}</span>
+      </div>
+    `;
+  }
+
+  container.innerHTML = html;
+
+  container.querySelectorAll('.day-budget-row:not(.future)').forEach(row => {
+    row.addEventListener('click', () => {
+      const date = row.dataset.date;
+      if (date) {
+        const [y, m] = date.split('-').map(Number);
+        if (y !== currentYear || m !== currentMonth) {
+          currentYear = y;
+          currentMonth = m;
+          syncDateToCurrentMonth();
+          refreshAll();
+        } else {
+          selectedDate = date;
+          updateDateDisplay();
+          renderList();
+        }
+        
+        // 检查是否未激活双页模式（即不是宽屏或宽屏但未处于双页显示）
+        const isWideScreen = window.innerWidth >= 768;
+        const isDualPageActive = isWideScreen && document.body.classList.contains('dual-mode');
+        
+        if (!isDualPageActive && isReviewMode) {
+          // 取消激活月度复盘按钮
+          toggleReview();
+        }
+      }
+    });
+  });
+}
+
+let isDayBudgetExpanded = false;
+
+function toggleDayBudget() {
+  isDayBudgetExpanded = !isDayBudgetExpanded;
+  const card = document.querySelector('.review-card.collapsible');
+  const section = document.getElementById('dayBudgetSection');
+  const toggle = document.getElementById('dayBudgetToggle');
+
+  if (isDayBudgetExpanded) {
+    section.style.display = '';
+    card.classList.remove('collapsed');
+  } else {
+    section.style.display = 'none';
+    card.classList.add('collapsed');
+  }
+}
+
 let editingId = null;
 
 function openEditPanel(id) {
@@ -824,12 +1727,12 @@ function openEditPanel(id) {
     btn.classList.toggle('selected', btn.dataset.subtype === (tx.subType || 'expense'));
   });
 
-  document.getElementById('editOverlay').style.display = '';
+  openOverlay('editOverlay');
   document.getElementById('editAmount').focus();
 }
 
 function closeEditPanel() {
-  document.getElementById('editOverlay').style.display = 'none';
+  closeAllOverlays();
   editingId = null;
   restoreEditPanel();
 }
@@ -1198,19 +2101,12 @@ function openDataPanel() {
   const total = getTotalExpense();
   const el = document.getElementById('dataTotalExpense');
   el.textContent = formatAmount(total);
-  const summary = document.getElementById('dataSummary');
-  if (total >= MAX_TOTAL) {
-    summary.classList.add('mega');
-    summary.classList.add('maxed');
-  } else {
-    summary.classList.remove('mega', 'maxed');
-  }
 
-  document.getElementById('dataOverlay').style.display = '';
+  openOverlay('dataOverlay');
 }
 
 function closeDataPanel() {
-  document.getElementById('dataOverlay').style.display = 'none';
+  closeAllOverlays();
 }
 
 function clearCurrentMonth() {
@@ -1250,6 +2146,33 @@ function clearAllData() {
 document.addEventListener('DOMContentLoaded', () => {
   loadData();
   initMonth();
+  initThemePanel();
+
+  window.addEventListener('resize', () => {
+    const pageWrapper = document.getElementById('pageWrapper');
+    const appContainer = document.querySelector('.app');
+    const reviewSection = document.getElementById('reviewSection');
+    const isWideScreen = window.innerWidth >= 768;
+    if (isReviewMode) {
+      if (isWideScreen) {
+        pageWrapper.classList.add('dual-page');
+        appContainer.classList.add('dual-mode');
+        document.body.classList.add('dual-mode');
+        reviewSection.style.display = '';
+        document.getElementById('formSection').style.display = '';
+        document.getElementById('listSection').style.display = '';
+      } else {
+        pageWrapper.classList.remove('dual-page');
+        appContainer.classList.remove('dual-mode');
+        document.body.classList.remove('dual-mode');
+        setTimeout(() => {
+          reviewSection.style.display = 'none';
+          document.getElementById('formSection').style.display = 'none';
+          document.getElementById('listSection').style.display = 'none';
+        }, 300);
+      }
+    }
+  });
 
   const today = getTodayDate();
   selectedDate = today;
@@ -1266,9 +2189,13 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('calConfirm').addEventListener('click', confirmCalendar);
 
   document.getElementById('btnSubmit').addEventListener('click', addTransaction);
+  document.getElementById('btnQuickEntry').addEventListener('click', openQuickPanel);
+  document.getElementById('btnQuickClose').addEventListener('click', closeQuickPanel);
+  document.getElementById('quickOverlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeQuickPanel();
+  });
   document.getElementById('btnPrevMonth').addEventListener('click', () => { saveMemo(); prevMonth(); });
   document.getElementById('btnNextMonth').addEventListener('click', () => { saveMemo(); nextMonth(); });
-  document.getElementById('btnReview').addEventListener('click', toggleReview);
   document.getElementById('btnTopReview').addEventListener('click', toggleReview);
 
   document.getElementById('btnCategoryBack').addEventListener('click', hideCategoryDetail);
@@ -1310,6 +2237,20 @@ document.addEventListener('DOMContentLoaded', () => {
       clearAllData();
     }
   });
+
+  document.getElementById('btnBudgetEdit').addEventListener('click', () => {
+    openBudgetPanel(currentYear, currentMonth);
+  });
+  document.getElementById('btnBudgetClose').addEventListener('click', closeBudgetPanel);
+  document.getElementById('budgetOverlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeBudgetPanel();
+  });
+  document.getElementById('dayBudgetToggle').addEventListener('click', toggleDayBudget);
+  document.getElementById('budgetOverviewToggle').addEventListener('click', (e) => {
+    if (e.target.tagName !== 'BUTTON') toggleBudgetOverview();
+  });
+  document.getElementById('btnBudgetSave').addEventListener('click', saveBudget);
+  document.getElementById('btnBudgetDelete').addEventListener('click', deleteBudgetConfig);
 
   document.getElementById('inputAmount').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') addTransaction();

@@ -22,15 +22,17 @@
         <span class="month-expense-label">支出</span>
         <span class="month-expense-value" id="monthExpense">¥0.00</span>
       </div>
-      <button class="btn-top-review" id="btnTopReview" title="月度复盘">◈</button>
+      <button class="btn-top-review" id="btnTopReview">月度复盘</button>
     </header>
 
     <main class="main-content">
+      <div class="page-wrapper" id="pageWrapper">
 
+      <div class="page-left">
       <section class="form-section" id="formSection">
         <div class="amount-group">
           <span class="currency-sign">¥</span>
-          <input type="number" id="inputAmount" class="amount-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal" autofocus>
+          <input type="number" id="inputAmount" class="amount-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal" autocomplete="off" name="amount" form="dummy-form" autofocus>
         </div>
         <div class="category-grid" id="categoryGrid"></div>
         <div class="form-row">
@@ -49,85 +51,161 @@
             <input type="text" id="inputNote" class="form-input" placeholder="备注" maxlength="20">
           </div>
         </div>
-        <button id="btnSubmit" class="btn-submit">
-          <span class="btn-icon">✓</span>
-          记一笔
-        </button>
-        <label class="advance-toggle">
-          <input type="checkbox" id="advanceToggle">
-          <span class="advance-toggle-track">
-            <span class="advance-toggle-thumb"></span>
-          </span>
-          <span class="advance-toggle-label">垫付</span>
-        </label>
+        <button id="btnSubmit" class="btn-primary">记一笔</button>
+        <div class="form-actions">
+          <label class="toggle">
+            <input type="checkbox" id="advanceToggle">
+            <span class="toggle-track">
+              <span class="toggle-thumb"></span>
+            </span>
+            <span class="toggle-label">垫付</span>
+          </label>
+          <button id="btnQuickEntry" class="btn-secondary">快速记账</button>
+        </div>
       </section>
 
       <section class="list-section" id="listSection">
+        <div class="today-budget-bar" id="todayBudgetBar">
+          <div class="today-budget-left">
+            <span class="today-budget-label">当日可用</span>
+            <span class="today-budget-value" id="todayBudgetValue">¥0.00</span>
+          </div>
+          <div class="today-budget-right">
+            <span class="today-budget-spent-label">当日已花</span>
+            <span class="today-budget-spent-value" id="todayBudgetSpent">¥0.00</span>
+          </div>
+          <div class="today-budget-status" id="todayBudgetStatus"></div>
+        </div>
         <div class="list-header">
           <span class="list-title" id="listTitle">今天</span>
           <div class="list-header-right">
             <span class="list-count" id="listCount">0 笔</span>
-            <button class="btn-select-mode" id="btnSelectMode">选择</button>
+            <span class="list-day-expense" id="listDayExpense"></span>
+            <button class="btn-ghost" id="btnSelectMode">选择</button>
           </div>
         </div>
         <div class="list-body" id="listBody">
           <div class="empty-list">还没有记录</div>
         </div>
       </section>
+      </div>
 
+      <div class="page-right">
       <section class="review-section" id="reviewSection" style="display:none">
-        <div class="review-header">
-          <span class="review-title">月度复盘</span>
-          <span class="review-period" id="reviewPeriod">2026年5月</span>
-        </div>
-        <div class="review-summary">
-          <div class="review-summary-item">
-            <span class="review-summary-label">总支出</span>
-            <span class="review-summary-value" id="reviewTotal">¥0.00</span>
+        <div class="review-card collapsible" id="budgetOverviewCard">
+          <div class="review-card-header" id="budgetOverviewToggle">
+            <span class="review-card-title">月度预算</span>
+            <span class="review-card-arrow">▼</span>
+            <button class="btn-ghost" id="btnBudgetEdit">设置</button>
           </div>
-          <div class="review-summary-item">
-            <span class="review-summary-label">总笔数</span>
-            <span class="review-summary-value review-count" id="reviewCount">0</span>
-          </div>
-          <div class="review-summary-item">
-            <span class="review-summary-label">日均</span>
-            <span class="review-summary-value" id="reviewDailyAvg">¥0.00</span>
-          </div>
-          <div class="review-summary-item">
-            <span class="review-summary-label">单笔最高</span>
-            <span class="review-summary-value" id="reviewMax">¥0.00</span>
-          </div>
-        </div>
-        <div class="review-rank-title">分类排行</div>
-        <div class="review-rank" id="reviewRank"></div>
-        <div class="review-category-detail" id="reviewCategoryDetail" style="display:none">
-          <div class="review-category-detail-header">
-            <button class="review-category-detail-back" id="btnCategoryBack">← 返回</button>
-            <span class="review-category-detail-title" id="reviewCategoryTitle">餐饮</span>
-            <span class="review-category-detail-count" id="reviewCategoryCount">0 笔</span>
-          </div>
-          <div class="trend-section" id="trendSection">
-            <div class="trend-header">
-              <span class="trend-title">近6月趋势</span>
+          <div class="review-card-body" id="budgetOverviewBody">
+            <div class="budget-summary-row">
+              <div class="budget-summary-col">
+                <span class="budget-summary-label">预算</span>
+                <span class="budget-summary-value" id="budgetAmount">¥0.00</span>
+              </div>
+              <div class="budget-summary-col">
+                <span class="budget-summary-label">已花</span>
+                <span class="budget-summary-value" id="budgetSpent">¥0.00</span>
+              </div>
+              <div class="budget-summary-col">
+                <span class="budget-summary-label">剩余</span>
+                <span class="budget-summary-value" id="budgetRemaining">¥0.00</span>
+              </div>
             </div>
-            <canvas class="trend-canvas" id="trendCanvas" width="600" height="200"></canvas>
+            <div class="budget-progress">
+              <div class="budget-progress-bar" id="budgetProgressBar"></div>
+            </div>
+            <div class="budget-today-row">
+              <span class="budget-today-label">当日可用</span>
+              <span class="budget-today-value" id="budgetTodayValue">¥0.00</span>
+              <span class="budget-today-status" id="budgetTodayStatus"></span>
+            </div>
+            <div class="budget-target" id="budgetTarget" style="display:none">
+              <span class="budget-target-label">目标：</span>
+              <span class="budget-target-value" id="budgetTargetValue"></span>
+            </div>
           </div>
-          <div class="review-category-detail-list" id="reviewCategoryList"></div>
         </div>
-        <div class="review-memo">
-          <div class="review-memo-header">
-            <span class="review-memo-title">月度小结</span>
-            <span class="review-memo-hint">记录本月的想法与反思</span>
+
+        <div class="review-card collapsible">
+          <div class="review-card-header" id="dayBudgetToggle">
+            <span class="review-card-title">每日预算追踪</span>
+            <span class="review-card-arrow">▼</span>
           </div>
-          <textarea class="review-memo-input" id="memoInput" placeholder="这个月花了哪些不该花的钱？下个月有什么预算计划？&#10;&#10;写下你的思考..." maxlength="500"></textarea>
-          <div class="review-memo-footer">
-            <span class="review-memo-count" id="memoCount">0/500</span>
+          <div class="review-card-body" id="dayBudgetSection" style="display:none">
+            <div class="day-budget-list" id="dayBudgetList"></div>
           </div>
         </div>
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <span class="review-card-title">支出统计</span>
+          </div>
+          <div class="review-card-body">
+            <div class="review-summary-grid">
+              <div class="review-summary-item">
+                <span class="review-summary-label">总支出</span>
+                <span class="review-summary-value" id="reviewTotal">¥0.00</span>
+              </div>
+              <div class="review-summary-item">
+                <span class="review-summary-label">日均</span>
+                <span class="review-summary-value" id="reviewDailyAvg">¥0.00</span>
+              </div>
+              <div class="review-summary-item">
+                <span class="review-summary-label">总笔数</span>
+                <span class="review-summary-value" id="reviewCount">0</span>
+              </div>
+              <div class="review-summary-item">
+                <span class="review-summary-label">单笔最高</span>
+                <span class="review-summary-value" id="reviewMax">¥0.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <span class="review-card-title">分类分析</span>
+          </div>
+          <div class="review-card-body">
+            <div class="review-rank" id="reviewRank"></div>
+          </div>
+        </div>
+
+        <div class="review-category-detail" id="reviewCategoryDetail" style="display:none">
+          <div class="review-card-header">
+            <button class="btn-ghost" id="btnCategoryBack">返回</button>
+            <span class="review-card-title" id="reviewCategoryTitle">餐饮</span>
+            <span class="review-card-count" id="reviewCategoryCount">0 笔</span>
+          </div>
+          <div class="review-card-body">
+            <div class="trend-section" id="trendSection">
+              <span class="trend-title">近6月趋势</span>
+              <canvas class="trend-canvas" id="trendCanvas" width="600" height="200"></canvas>
+            </div>
+            <div class="review-category-detail-list" id="reviewCategoryList"></div>
+          </div>
+        </div>
+
+        <div class="review-card">
+          <div class="review-card-header">
+            <span class="review-card-title">月度小结</span>
+          </div>
+          <div class="review-card-body">
+            <textarea class="review-memo-input" id="memoInput" placeholder="这个月花了哪些不该花的钱？下个月有什么预算计划？写下你的思考..." maxlength="500"></textarea>
+            <div class="review-memo-footer">
+              <span class="review-memo-count" id="memoCount">0/500</span>
+            </div>
+          </div>
+        </div>
+
         <div class="review-footer">
-          <button class="btn-data-mgmt" id="btnDataMgmt">数据管理</button>
+          <button class="btn-ghost" id="btnDataMgmt">数据管理</button>
         </div>
       </section>
+
+      </div>
 
     </main>
 
@@ -135,28 +213,40 @@
       <span class="batch-bar-count" id="batchCount">已选 0 笔</span>
       <div class="batch-bar-actions">
         <button class="btn-batch" id="btnBatchInvert">反选</button>
-        <button class="btn-batch" id="btnBatchCategory">改分类</button>
-        <button class="btn-batch" id="btnBatchDate">改日期</button>
-        <button class="btn-batch btn-batch-delete" id="btnBatchDelete">删除</button>
+        <button class="btn-batch" id="btnBatchCategory">分类</button>
+        <button class="btn-batch" id="btnBatchDate">日期</button>
+        <button class="btn-batch btn-danger" id="btnBatchDelete">删除</button>
       </div>
-    </div>
-
-    <div class="bottom-bar">
-      <button class="btn-review" id="btnReview">
-        <span class="btn-review-icon">◈</span>
-        月度复盘
-      </button>
     </div>
 
   </div>
 
   <div class="toast" id="toast"></div>
 
-  <div class="edit-overlay" id="editOverlay" style="display:none">
-    <div class="edit-panel" id="editPanel">
-      <div class="edit-panel-handle"></div>
-      <div class="edit-panel-title" id="editPanelTitle">编辑账单</div>
-      <div class="edit-panel-body">
+  <div class="overlay" id="quickOverlay" style="display:none">
+    <div class="panel">
+      <div class="panel-handle"></div>
+      <div class="panel-header">
+        <span class="panel-title">快速记账</span>
+        <button class="panel-close" id="btnQuickClose">×</button>
+      </div>
+      <div class="panel-body">
+        <div class="quick-panel-amount">
+          <span class="currency-sign">¥</span>
+          <span class="quick-amount-display" id="quickAmountDisplay">0.00</span>
+        </div>
+        <div class="quick-category-grid" id="quickCategoryGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="editOverlay" style="display:none">
+    <div class="panel" id="editPanel">
+      <div class="panel-handle"></div>
+      <div class="panel-header">
+        <span class="panel-title" id="editPanelTitle">编辑账单</span>
+      </div>
+      <div class="panel-body">
         <div class="edit-field-group">
           <div class="amount-group">
             <span class="currency-sign">¥</span>
@@ -188,55 +278,146 @@
           </div>
         </div>
       </div>
-      <div class="edit-panel-actions">
-        <button class="btn-edit-delete" id="btnEditDelete">删除</button>
-        <button class="btn-edit-save" id="btnEditSave">保存</button>
+      <div class="panel-actions">
+        <button class="btn-ghost" id="btnEditDelete">删除</button>
+        <button class="btn-primary" id="btnEditSave">保存</button>
       </div>
     </div>
   </div>
 
-  <div class="data-overlay" id="dataOverlay" style="display:none">
-    <div class="data-panel">
-      <div class="data-panel-handle"></div>
-      <div class="data-panel-title">数据管理</div>
-      <div class="data-panel-body">
+  <div class="overlay" id="dataOverlay" style="display:none">
+    <div class="panel">
+      <div class="panel-handle"></div>
+      <div class="panel-header">
+        <span class="panel-title">数据管理</span>
+      </div>
+      <div class="panel-body">
         <div class="data-summary" id="dataSummary">
           <span class="data-summary-label">累计支出</span>
           <span class="data-summary-value" id="dataTotalExpense">¥0.00</span>
         </div>
-        <button class="btn-data-action" id="btnClearMonth">
-          <span class="data-action-label">清除本月数据</span>
-          <span class="data-action-desc" id="clearMonthDesc">删除 2026年5月 的所有账单</span>
-        </button>
-        <button class="btn-data-action btn-data-action-danger" id="btnClearAll">
-          <span class="data-action-label">清除所有数据</span>
-          <span class="data-action-desc">删除全部账单，恢复初始状态</span>
-        </button>
+        <div class="data-actions">
+          <button class="data-action-btn" id="btnClearMonth">
+            <div class="data-action-content">
+              <span class="data-action-title">清除本月数据</span>
+              <span class="data-action-desc" id="clearMonthDesc">删除当月所有账单</span>
+            </div>
+          </button>
+          <button class="data-action-btn danger" id="btnClearAll">
+            <div class="data-action-content">
+              <span class="data-action-title">清除所有数据</span>
+              <span class="data-action-desc">删除全部账单，无法恢复</span>
+            </div>
+          </button>
+          <button class="data-action-btn" id="btnTheme">
+            <div class="data-action-content">
+              <span class="data-action-title">主题设置</span>
+              <span class="data-action-desc">自定义应用外观颜色</span>
+            </div>
+          </button>
+        </div>
       </div>
-      <div class="data-panel-actions">
-        <button class="btn-data-cancel" id="btnDataCancel">取消</button>
+      <div class="panel-actions">
+        <button class="btn-ghost" id="btnDataCancel">取消</button>
       </div>
     </div>
   </div>
 
-  <div class="calendar-overlay" id="calendarOverlay">
-    <div class="calendar-panel" id="calendarPanel">
-      <div class="calendar-header">
-        <button class="cal-nav-btn" id="calPrevMonth">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-        </button>
-        <span class="cal-title" id="calTitle"></span>
-        <button class="cal-nav-btn" id="calNextMonth">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </button>
+  <div class="overlay" id="budgetOverlay" style="display:none">
+    <div class="panel">
+      <div class="panel-handle"></div>
+      <div class="panel-header">
+        <span class="panel-title">设置预算</span>
+        <button class="panel-close" id="btnBudgetClose">×</button>
       </div>
-      <div class="cal-weekdays">
-        <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+      <div class="panel-body">
+        <div class="budget-form-group">
+          <label class="budget-form-label">预算金额</label>
+          <div class="budget-input-group">
+            <span class="budget-input-prefix">¥</span>
+            <input type="number" id="inputBudgetAmount" class="budget-input" placeholder="留空则不设置预算" step="0.01" min="0">
+          </div>
+        </div>
+        <div class="budget-form-group">
+          <label class="budget-form-label">预算目标（选填）</label>
+          <input type="text" id="inputBudgetTarget" class="budget-input budget-input-full" placeholder="如：攒钱买iPhone" maxlength="50">
+        </div>
+        <div class="budget-form-group">
+          <label class="budget-form-label">工作模式</label>
+          <div class="budget-workmode-group">
+            <label class="budget-workmode-option">
+              <input type="radio" name="workMode" value="double" checked>
+              <span class="budget-workmode-radio"></span>
+              <span class="budget-workmode-text">双休（周六、周日休息）</span>
+            </label>
+            <label class="budget-workmode-option">
+              <input type="radio" name="workMode" value="single">
+              <span class="budget-workmode-radio"></span>
+              <span class="budget-workmode-text">单休（仅周日休息）</span>
+            </label>
+          </div>
+        </div>
       </div>
-      <div class="cal-grid" id="calGrid"></div>
-      <div class="cal-footer">
-        <button class="cal-btn cal-btn-today" id="calToday">今天</button>
-        <button class="cal-btn cal-btn-confirm" id="calConfirm">确定</button>
+      <div class="panel-actions">
+        <button class="btn-ghost" id="btnBudgetDelete" style="display:none">删除</button>
+        <button class="btn-primary" id="btnBudgetSave">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay panel-modal" id="calendarOverlay" style="display:none">
+    <div class="panel calendar-panel">
+      <div class="panel-header">
+        <button class="btn-icon" id="calPrevMonth">‹</button>
+        <span class="panel-title" id="calTitle"></span>
+        <button class="btn-icon" id="calNextMonth">›</button>
+      </div>
+      <div class="panel-body">
+        <div class="cal-weekdays">
+          <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+      <div class="panel-actions">
+        <button class="btn-secondary" id="calToday">今天</button>
+        <button class="btn-primary" id="calConfirm">确定</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="themeOverlay" style="display:none">
+    <div class="panel">
+      <div class="panel-handle"></div>
+      <div class="panel-header">
+        <span class="panel-title">主题设置</span>
+      </div>
+      <div class="panel-body">
+        <div class="theme-section-title">预设主题</div>
+        <div class="theme-presets" id="themePresets"></div>
+        <div class="theme-section-title">自定义颜色</div>
+        <div class="theme-custom">
+        <label class="theme-color-btn" id="themeAccentBtn">
+          <span class="theme-color-label">主题色</span>
+          <input type="color" id="themeAccent" value="#5a5aff">
+        </label>
+        <label class="theme-color-btn" id="themeBgBtn">
+          <span class="theme-color-label">背景色</span>
+          <input type="color" id="themeBg" value="#0d0d1a">
+        </label>
+        <label class="theme-color-btn" id="themeExpenseBtn">
+          <span class="theme-color-label">支出色</span>
+          <input type="color" id="themeExpense" value="#ff4757">
+        </label>
+        <label class="theme-color-btn" id="themeIncomeBtn">
+          <span class="theme-color-label">收入色</span>
+          <input type="color" id="themeIncome" value="#2ecc71">
+        </label>
+      </div>
+        <div class="theme-custom-preview" id="themeCustomPreview" style="display:none"></div>
+      </div>
+      <div class="panel-actions">
+        <button class="btn-ghost" id="btnThemeClose">取消</button>
+        <button class="btn-primary" id="btnThemeApply">应用</button>
       </div>
     </div>
   </div>
