@@ -1,4 +1,7 @@
 function initOverlaySwipe(overlayEl) {
+  if (overlayEl._swipeReady) return;
+  overlayEl._swipeReady = true;
+
   const panel = overlayEl.querySelector('.panel');
   if (!panel) return;
 
@@ -64,14 +67,13 @@ function initOverlaySwipe(overlayEl) {
       overlayEl.style.transition = 'background 0.3s ease';
       overlayEl.style.background = 'rgba(0, 0, 0, 0)';
       setTimeout(() => {
-        overlayEl.style.display = 'none';
+        closeAllOverlays();
         overlayEl.style.transition = '';
         panel.style.transition = '';
         panel.style.transform = '';
         panel.style.animation = '';
         overlayEl.style.background = '';
         panel.style.overflowY = '';
-        document.body.classList.remove('overlay-open');
       }, 300);
     } else {
       panel.style.transform = 'translateY(0)';
