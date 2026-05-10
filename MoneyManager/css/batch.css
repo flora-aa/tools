@@ -3,19 +3,31 @@
   bottom: 0;
   z-index: 100;
   margin-top: 12px;
-  padding: 10px 0;
+  padding: 10px 14px;
   padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
-  background: var(--bg-primary);
-  border-top: 1px solid var(--border-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  border-radius: 999px;
+  background: var(--bg-card);
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .batch-bar {
+    background: color-mix(in srgb, var(--bg-primary) 55%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
 }
 
 .batch-bar-count {
+  padding: 6px 14px;
+  background: var(--bg-card);
+  border-radius: 999px;
   font-size: 13px;
   color: var(--text-secondary);
   font-weight: 500;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
 .batch-bar-actions {
@@ -24,51 +36,51 @@
 }
 
 .btn-batch {
-  padding: 8px 16px;
+  padding: 6px 18px;
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  border: none;
+  border-radius: 999px;
   color: var(--text-primary);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   font-family: inherit;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
 }
 
 .btn-batch:active {
   transform: scale(0.95);
-  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
 }
 
-.btn-batch-delete {
+.btn-batch.btn-danger {
   color: var(--color-expense);
-  border-color: var(--color-expense-bg);
 }
 
-.btn-batch-delete:active {
-  background: var(--color-expense-bg);
+.btn-batch.btn-danger:active {
+  background: var(--color-expense);
+  color: #fff;
 }
 
 @media (max-width: 360px) {
+  .batch-bar {
+    padding: 8px 12px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+  }
+
   .batch-bar-actions {
-    gap: 4px;
+    gap: 6px;
   }
 
   .btn-batch {
-    padding: 6px 10px;
+    padding: 5px 14px;
     font-size: 12px;
   }
-}
 
-@media (min-width: 768px) {
-  .batch-bar {
-    margin-top: 12px;
-    padding: 12px 16px;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
-    border-radius: var(--radius-lg);
-    background: var(--bg-card);
-    border: none;
-    box-shadow: none;
+  .batch-bar-count {
+    padding: 5px 12px;
+    font-size: 12px;
   }
 }

@@ -6,6 +6,10 @@ function openDataPanel() {
   const el = document.getElementById('dataTotalExpense');
   el.textContent = formatAmount(total);
 
+  initInheritPanel();
+  resetExportForm();
+  switchInheritTab('export');
+
   openOverlay('dataOverlay');
 }
 

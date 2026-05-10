@@ -95,6 +95,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  document.getElementById('btnExportTab').addEventListener('click', () => switchInheritTab('export'));
+  document.getElementById('btnImportTab').addEventListener('click', () => switchInheritTab('import'));
+  document.getElementById('btnExport').addEventListener('click', handleExport);
+  document.getElementById('btnCopyGistId').addEventListener('click', handleCopyGistId);
+  document.getElementById('btnCopyPin').addEventListener('click', handleCopyPin);
+  document.getElementById('btnExportReset').addEventListener('click', resetExportForm);
+  document.getElementById('btnImport').addEventListener('click', handleImport);
+
   document.getElementById('btnBudgetEdit').addEventListener('click', () => {
     openBudgetPanel(currentYear, currentMonth);
   });

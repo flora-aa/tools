@@ -324,6 +324,75 @@
             </div>
           </button>
         </div>
+
+        <div class="data-section-divider"></div>
+
+        <div class="inherit-section">
+          <div class="inherit-tabs">
+            <button class="inherit-tab active" id="btnExportTab">导出数据</button>
+            <button class="inherit-tab" id="btnImportTab">导入数据</button>
+          </div>
+
+          <div class="inherit-panel" id="exportPanel">
+            <div id="exportForm">
+              <div class="inherit-summary">
+                <div class="inherit-summary-item">
+                  <span class="inherit-summary-label">交易记录</span>
+                  <span class="inherit-summary-value" id="inheritTxCount">0 笔</span>
+                </div>
+                <div class="inherit-summary-item">
+                  <span class="inherit-summary-label">时间跨度</span>
+                  <span class="inherit-summary-value" id="inheritDateRange">暂无数据</span>
+                </div>
+                <div class="inherit-summary-item">
+                  <span class="inherit-summary-label">预算配置</span>
+                  <span class="inherit-summary-value" id="inheritBudgetCount">0 个月</span>
+                </div>
+              </div>
+              <div class="inherit-field">
+                <input type="password" class="inherit-input" id="exportToken" placeholder="GitHub Token (ghp_...)" autocomplete="off">
+                <a class="inherit-help" href="https://github.com/settings/tokens" target="_blank" rel="noopener">如何获取 Token?</a>
+              </div>
+              <div class="inherit-status" id="exportStatus" style="display:none"></div>
+              <button class="inherit-btn" id="btnExport">导出并上传到 Gist</button>
+            </div>
+            <div id="exportSuccess" style="display:none">
+              <div class="inherit-success-icon">✅</div>
+              <div class="inherit-success-text">数据已上传到 GitHub Gist</div>
+              <div class="inherit-gist-field">
+                <span class="inherit-gist-label">Gist ID</span>
+                <div class="inherit-gist-row">
+                  <span class="inherit-gist-id" id="exportGistId"></span>
+                  <button class="inherit-copy-btn" id="btnCopyGistId">复制</button>
+                </div>
+              </div>
+              <div class="inherit-pin-field">
+                <span class="inherit-gist-label">PIN 码</span>
+                <div class="inherit-pin-row">
+                  <span class="inherit-pin-value" id="exportPinValue"></span>
+                  <button class="inherit-copy-btn" id="btnCopyPin">复制</button>
+                </div>
+              </div>
+              <div class="inherit-expiry-row">
+                <span class="inherit-expiry-label">有效时间</span>
+                <span class="inherit-expiry" id="exportExpiry"></span>
+              </div>
+              <button class="inherit-link" id="btnExportReset">重新导出</button>
+            </div>
+          </div>
+
+          <div class="inherit-panel" id="importPanel" style="display:none">
+            <div class="inherit-warning">⚠️ 此操作将清空所有本地数据</div>
+            <div class="inherit-field">
+              <input type="text" class="inherit-input" id="importGistId" placeholder="Gist ID (如 a1b2c3d4e5f6)">
+            </div>
+            <div class="inherit-field">
+              <input type="text" class="inherit-input" id="importPin" placeholder="6 位 PIN 码" maxlength="6" inputmode="numeric" pattern="[0-9]*">
+            </div>
+            <div class="inherit-status" id="importStatus" style="display:none"></div>
+            <button class="inherit-btn inherit-btn-danger" id="btnImport">导入并继承数据</button>
+          </div>
+        </div>
       </div>
       <div class="panel-actions">
         <button class="btn-ghost" id="btnDataCancel">取消</button>
@@ -448,6 +517,7 @@
   <script src="js/edit.js"></script>
   <script src="js/batch.js"></script>
   <script src="js/data.js"></script>
+  <script src="js/inherit.js"></script>
   <script src="js/main.js"></script>
 </body>
 </html>
