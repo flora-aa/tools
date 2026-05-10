@@ -2,12 +2,20 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="theme-color" content="#0d0d1a">
   <title>MoneyManager</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/overlay.css">
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/budget.css">
+  <link rel="stylesheet" href="css/review.css">
+  <link rel="stylesheet" href="css/batch.css">
+  <link rel="stylesheet" href="css/data.css">
+  <link rel="stylesheet" href="css/dual.css">
 </head>
 <body>
   <div class="app">
@@ -86,6 +94,15 @@
         </div>
         <div class="list-body" id="listBody">
           <div class="empty-list">还没有记录</div>
+        </div>
+        <div class="batch-bar" id="batchBar" style="display:none">
+          <span class="batch-bar-count" id="batchCount">已选 0 笔</span>
+          <div class="batch-bar-actions">
+            <button class="btn-batch" id="btnBatchInvert">反选</button>
+            <button class="btn-batch" id="btnBatchCategory">分类</button>
+            <button class="btn-batch" id="btnBatchDate">日期</button>
+            <button class="btn-batch btn-danger" id="btnBatchDelete">删除</button>
+          </div>
         </div>
       </section>
       </div>
@@ -205,17 +222,9 @@
 
       </div>
 
-    </main>
-
-    <div class="batch-bar" id="batchBar" style="display:none">
-      <span class="batch-bar-count" id="batchCount">已选 0 笔</span>
-      <div class="batch-bar-actions">
-        <button class="btn-batch" id="btnBatchInvert">反选</button>
-        <button class="btn-batch" id="btnBatchCategory">分类</button>
-        <button class="btn-batch" id="btnBatchDate">日期</button>
-        <button class="btn-batch btn-danger" id="btnBatchDelete">删除</button>
       </div>
-    </div>
+
+    </main>
 
   </div>
 
@@ -229,11 +238,12 @@
         <button class="panel-close" id="btnQuickClose">×</button>
       </div>
       <div class="panel-body">
-        <div class="quick-panel-amount">
-          <span class="currency-sign">¥</span>
-          <span class="quick-amount-display" id="quickAmountDisplay">0.00</span>
+        <div class="quick-amount-bar" id="quickAmountBar" style="display:none">
+          <span class="quick-amount-label">金额</span>
+          <span class="quick-amount-value" id="quickAmountDisplay">¥0.00</span>
         </div>
         <div class="quick-category-grid" id="quickCategoryGrid"></div>
+        <button class="btn-primary quick-submit-btn" id="btnQuickSubmit" style="display:none">确认记账</button>
       </div>
     </div>
   </div>
@@ -420,6 +430,24 @@
     </div>
   </div>
 
-  <script src="script.js"></script>
+  <!-- JS 加载顺序遵循依赖关系 -->
+  <script src="js/constants.js"></script>
+  <script src="js/state.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/overlay.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/calendar.js"></script>
+  <script src="js/categories.js"></script>
+  <script src="js/transaction.js"></script>
+  <script src="js/list.js"></script>
+  <script src="js/review.js"></script>
+  <script src="js/quick.js"></script>
+  <script src="js/heatmap.js"></script>
+  <script src="js/budget.js"></script>
+  <script src="js/edit.js"></script>
+  <script src="js/batch.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>

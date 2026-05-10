@@ -1,0 +1,50 @@
+.page-right {
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (min-width: 768px) {
+  .app.dual-mode {
+    max-width: calc(480px * 2 + 20px + 32px);
+    transition: max-width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .page-wrapper.dual-page {
+    flex-direction: row;
+    gap: 24px;
+    align-items: flex-start;
+  }
+
+  .page-wrapper.dual-page .page-left,
+  .page-wrapper.dual-page .page-right {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .page-wrapper.dual-page .form-section,
+  .page-wrapper.dual-page #listSection {
+    height: fit-content;
+  }
+
+  .page-wrapper.dual-page .review-section {
+    height: fit-content;
+  }
+
+  .page-wrapper.dual-page .page-left,
+  .page-wrapper.dual-page .page-right {
+    opacity: 0;
+    transform: translateX(20px);
+    animation: pageFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  }
+
+  .page-wrapper.dual-page .page-right {
+    animation-delay: 0.05s;
+  }
+
+  @keyframes pageFadeIn {
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+}

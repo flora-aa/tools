@@ -1,0 +1,125 @@
+/* === 主题设置组件 === */
+
+.theme-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 1100;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.theme-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+  margin-top: 16px;
+}
+
+.theme-section-title:first-child {
+  margin-top: 0;
+}
+
+.theme-presets {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.theme-preset {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg-input);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.theme-preset:hover {
+  border-color: var(--border-color);
+}
+
+.theme-preset.active {
+  border-color: var(--accent);
+}
+
+.theme-preset-preview {
+  height: 48px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.theme-preset-accent,
+.theme-preset-expense,
+.theme-preset-income {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-xs);
+}
+
+.theme-preset-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.theme-custom-preview {
+  margin-top: 12px;
+}
+
+.theme-custom {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.theme-color-btn {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  background: var(--btn-color, #5a5aff);
+  color: var(--btn-text, #ffffff);
+  gap: 12px;
+}
+
+.theme-color-btn:hover {
+  filter: brightness(1.1);
+}
+
+.theme-color-btn:active {
+  transform: scale(0.98);
+}
+
+.theme-color-label {
+  font-size: 14px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.theme-color-btn input[type="color"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.btn-theme {
+  font-size: 18px;
+}

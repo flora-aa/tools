@@ -1,0 +1,475 @@
+/* 预算汇总布局 */
+.budget-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.budget-summary-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  background: var(--bg-input);
+  border-radius: var(--radius-md);
+  min-width: 0;
+}
+
+.budget-summary-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.budget-summary-value {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.budget-progress {
+  height: 6px;
+  background: var(--bg-input);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+.budget-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+.budget-today-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: var(--bg-input);
+  border-radius: var(--radius-md);
+}
+
+.budget-today-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.budget-today-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-expense);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.budget-today-status {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.budget-today-status.great {
+  color: #34c759;
+  background: rgba(52, 199, 89, 0.15);
+}
+
+.budget-today-status.good {
+  color: #30d158;
+  background: rgba(48, 209, 88, 0.15);
+}
+
+.budget-today-status.warn {
+  color: #ff9500;
+  background: rgba(255, 149, 0, 0.15);
+}
+
+.budget-today-status.over {
+  color: #ff3b30;
+  background: rgba(255, 59, 48, 0.15);
+}
+
+.budget-today-status.empty {
+  color: var(--text-secondary);
+  background: var(--bg-input);
+}
+
+.budget-target {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.budget-target-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.budget-target-value {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.day-budget-toggle {
+  margin-bottom: 12px;
+}
+
+.day-budget-toggle-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px;
+  background: var(--bg-card);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius);
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.day-budget-toggle-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.day-budget-toggle-btn.expanded .day-budget-toggle-icon {
+  transform: rotate(180deg);
+}
+
+.day-budget-toggle-icon {
+  font-size: 10px;
+  transition: transform 0.2s ease;
+}
+
+.budget-target {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border-color);
+}
+
+.budget-target-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.budget-target-value {
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.day-budget-section {
+  margin-bottom: 16px;
+}
+
+.day-budget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.day-budget-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.day-budget-list {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.day-budget-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 3px;
+  background: var(--bg-card);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.2s ease;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.day-budget-row:active {
+  opacity: 0.8;
+}
+
+.day-budget-row.today {
+  border: 1px solid var(--accent);
+}
+
+.day-budget-row.future {
+  opacity: 0.4;
+}
+
+.day-budget-row.heat-1 {
+  background: rgba(46, 204, 113, 0.15);
+}
+
+.day-budget-row.heat-2 {
+  background: rgba(46, 204, 113, 0.25);
+}
+
+.day-budget-row.heat-3 {
+  background: rgba(255, 193, 7, 0.25);
+}
+
+.day-budget-row.heat-4 {
+  background: rgba(255, 71, 87, 0.25);
+}
+
+.day-budget-row.heat-4 .day-budget-actual {
+  color: var(--color-expense);
+}
+
+.day-budget-date {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.day-budget-row.today .day-budget-date {
+  color: var(--accent);
+}
+
+.day-budget-bar-bg {
+  width: 100%;
+  height: 4px;
+  background: var(--bg-input);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.day-budget-bar {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.day-budget-bar.over {
+  background: var(--color-expense);
+}
+
+.day-budget-values {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.day-budget-budget {
+  font-size: 8px;
+  color: var(--text-secondary);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.day-budget-actual {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.day-budget-actual.over {
+  color: var(--color-expense);
+}
+
+.day-budget-date {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+/* === 预算表单样式 === */
+
+.budget-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.budget-form-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.budget-month-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.budget-month-btn {
+  background: var(--bg-input);
+  border: none;
+  color: var(--text-primary);
+  font-size: 20px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.budget-month-btn:active {
+  background: var(--border-color);
+}
+
+.budget-month-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-width: 100px;
+  text-align: center;
+}
+
+.budget-input-group {
+  display: flex;
+  align-items: center;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 0 14px;
+  transition: border-color 0.2s ease;
+}
+
+.budget-input-group:focus-within {
+  border-color: var(--accent);
+}
+
+.budget-input-prefix {
+  font-size: 18px;
+  color: var(--text-secondary);
+}
+
+.budget-input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 14px 10px;
+  font-family: inherit;
+}
+
+.budget-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 14px;
+}
+
+.budget-input-full {
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: border-color 0.2s ease;
+}
+
+.budget-input-full:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.budget-input-full::placeholder {
+  color: var(--text-muted);
+}
+
+.budget-input-text {
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.budget-input-text::placeholder {
+  color: var(--text-muted);
+}
+
+.budget-workmode-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.budget-workmode-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  padding: 10px 12px;
+  background: var(--bg-input);
+  border-radius: var(--radius-sm);
+  transition: background 0.2s ease;
+}
+
+.budget-workmode-option:has(input:checked) {
+  background: var(--accent-alpha-10);
+}
+
+.budget-workmode-option input {
+  display: none;
+}
+
+.budget-workmode-radio {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.budget-workmode-option:has(input:checked) .budget-workmode-radio {
+  border-color: var(--accent);
+}
+
+.budget-workmode-option:has(input:checked) .budget-workmode-radio::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+.budget-workmode-text {
+  font-size: 13px;
+  color: var(--text-primary);
+}

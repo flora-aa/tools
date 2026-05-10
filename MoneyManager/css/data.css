@@ -1,0 +1,81 @@
+.btn-data-mgmt {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+  font-family: inherit;
+  transition: color 0.2s ease;
+}
+
+.btn-data-mgmt:active {
+  color: var(--text-secondary);
+}
+
+.data-summary-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.data-summary-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-expense);
+  font-family: 'SF Mono', 'Fira Code', monospace;
+}
+
+.data-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.data-action-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  text-align: left;
+}
+
+.data-action-btn:active {
+  border-color: var(--accent);
+  transform: scale(0.98);
+}
+
+.data-action-btn.danger:active {
+  border-color: var(--color-expense);
+}
+
+.data-action-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.data-action-title {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 2px;
+}
+
+.data-action-btn.danger .data-action-title {
+  color: var(--color-expense);
+}
+
+.data-action-desc {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+}
