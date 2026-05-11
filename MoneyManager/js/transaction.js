@@ -95,6 +95,7 @@ function toggleReview() {
 
   if (isReviewMode) {
     if (isSelectMode) toggleSelectMode();
+    document.activeElement?.blur();
     btnTopReview.classList.add('active');
     renderReview();
     if (isWideScreen) {

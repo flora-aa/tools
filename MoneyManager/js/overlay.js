@@ -105,6 +105,7 @@ function closeAllOverlays() {
   });
   activeOverlay = null;
   document.body.classList.remove('overlay-open');
+  document.body.offsetHeight;
 }
 
 function openOverlay(id) {
