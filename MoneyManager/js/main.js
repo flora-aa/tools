@@ -21,25 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('resize', () => {
     const pageWrapper = document.getElementById('pageWrapper');
     const appContainer = document.querySelector('.app');
-    const reviewSection = document.getElementById('reviewSection');
     const isWideScreen = window.innerWidth >= 768;
     if (isReviewMode) {
       if (isWideScreen) {
         pageWrapper.classList.add('dual-page');
         appContainer.classList.add('dual-mode');
         document.body.classList.add('dual-mode');
-        reviewSection.style.display = '';
-        document.getElementById('formSection').style.display = '';
-        document.getElementById('listSection').style.display = '';
       } else {
         pageWrapper.classList.remove('dual-page');
         appContainer.classList.remove('dual-mode');
         document.body.classList.remove('dual-mode');
-        setTimeout(() => {
-          reviewSection.style.display = 'none';
-          document.getElementById('formSection').style.display = 'none';
-          document.getElementById('listSection').style.display = 'none';
-        }, 300);
       }
     }
   });
