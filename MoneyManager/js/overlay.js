@@ -99,13 +99,16 @@ function initOverlaySwipe(overlayEl) {
 }
 
 function closeAllOverlays() {
+  document.querySelectorAll('.pressed').forEach(el => el.classList.remove('pressed'));
   ALL_OVERLAYS.forEach(id => {
     const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
+    if (el) {
+      void el.offsetHeight;
+      el.style.display = 'none';
+    }
   });
   activeOverlay = null;
   document.body.classList.remove('overlay-open');
-  document.body.offsetHeight;
 }
 
 function openOverlay(id) {
@@ -114,6 +117,7 @@ function openOverlay(id) {
   const el = document.getElementById(id);
   if (el) {
     el.style.display = '';
+    void el.offsetHeight;
     activeOverlay = id;
     document.body.classList.add('overlay-open');
     initOverlaySwipe(el);

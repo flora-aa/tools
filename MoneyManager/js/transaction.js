@@ -92,10 +92,14 @@ function toggleReview() {
   const pageWrapper = document.getElementById('pageWrapper');
   const appContainer = document.querySelector('.app');
   const isWideScreen = window.innerWidth >= 768;
+  const memoInput = document.getElementById('memoInput');
 
   if (isReviewMode) {
     if (isSelectMode) toggleSelectMode();
-    document.activeElement?.blur();
+    if (memoInput) memoInput.tabIndex = -1;
+    if (document.activeElement && document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
     btnTopReview.classList.add('active');
     renderReview();
     if (isWideScreen) {
@@ -110,6 +114,7 @@ function toggleReview() {
       listSection.style.display = 'none';
       reviewSection.style.display = '';
     }
+    if (memoInput) requestAnimationFrame(() => { memoInput.tabIndex = 0; });
   } else {
     btnTopReview.classList.remove('active');
     if (isWideScreen) {

@@ -67,7 +67,8 @@
   color: var(--text-primary);
 }
 
-.btn-ghost:active {
+.btn-ghost:active,
+.btn-ghost.pressed {
   background: var(--bg-active);
 }
 

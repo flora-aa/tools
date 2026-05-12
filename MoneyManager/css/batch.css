@@ -50,7 +50,8 @@
   touch-action: manipulation;
 }
 
-.btn-batch:active {
+.btn-batch:active,
+.btn-batch.pressed {
   transform: scale(0.95);
   background: var(--accent);
   color: #fff;
@@ -60,7 +61,8 @@
   color: var(--color-expense);
 }
 
-.btn-batch.btn-danger:active {
+.btn-batch.btn-danger:active,
+.btn-batch.btn-danger.pressed {
   background: var(--color-expense);
   color: #fff;
 }
