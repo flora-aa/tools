@@ -51,8 +51,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.btn-batch:active,
-.btn-batch.pressed {
+.btn-batch:active {
   transform: scale(0.95);
   background: var(--accent);
   color: #fff;
@@ -63,12 +62,6 @@
 }
 
 .btn-batch.btn-danger:active {
-  background: var(--bg-card);
-  color: var(--color-expense);
-  transform: none;
-}
-
-.btn-batch.btn-danger.pressed {
   background: var(--color-expense);
   color: #fff;
 }

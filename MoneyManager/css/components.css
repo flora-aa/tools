@@ -61,6 +61,7 @@
   cursor: pointer;
   transition: transform 0.15s ease;
   -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
 
 .btn-ghost:hover {
@@ -68,8 +69,7 @@
   color: var(--text-primary);
 }
 
-.btn-ghost:active,
-.btn-ghost.pressed {
+.btn-ghost:active {
   background: var(--bg-active);
 }
 

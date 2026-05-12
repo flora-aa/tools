@@ -99,7 +99,6 @@ function initOverlaySwipe(overlayEl) {
 }
 
 function closeAllOverlays() {
-  document.querySelectorAll('.pressed').forEach(el => el.classList.remove('pressed'));
   ALL_OVERLAYS.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
@@ -109,6 +108,7 @@ function closeAllOverlays() {
   });
   activeOverlay = null;
   document.body.classList.remove('overlay-open');
+  document.body.offsetHeight;
 }
 
 function openOverlay(id) {

@@ -4,20 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
   initMonth();
   initThemePanel();
 
-  document.addEventListener('pointerdown', (e) => {
-    if (e.button !== 0) return;
-    const btn = e.target.closest('button, .btn-batch, .list-item, [role="button"]');
-    if (btn) btn.classList.add('pressed');
-  });
-
-  document.addEventListener('pointerup', () => {
-    document.querySelectorAll('.pressed').forEach(el => el.classList.remove('pressed'));
-  });
-
-  document.addEventListener('pointercancel', () => {
-    document.querySelectorAll('.pressed').forEach(el => el.classList.remove('pressed'));
-  });
-
   window.addEventListener('resize', () => {
     const pageWrapper = document.getElementById('pageWrapper');
     const appContainer = document.querySelector('.app');
