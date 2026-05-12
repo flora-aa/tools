@@ -61,7 +61,12 @@
   color: var(--color-expense);
 }
 
-.btn-batch.btn-danger:active,
+.btn-batch.btn-danger:active {
+  background: var(--bg-card);
+  color: var(--color-expense);
+  transform: none;
+}
+
 .btn-batch.btn-danger.pressed {
   background: var(--color-expense);
   color: #fff;
