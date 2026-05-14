@@ -46,26 +46,16 @@
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.15s ease;
+  transition: transform 0.15s ease, background 0.15s ease, color 0.15s ease;
   font-family: inherit;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
-.btn-batch:not(.btn-danger):active {
+.btn-batch:active {
   transform: scale(0.95);
   background: var(--accent);
-  color: #fff;
-}
-
-.btn-batch.btn-danger {
-  color: var(--color-expense);
-}
-
-.btn-batch.btn-danger:active {
-  transform: scale(0.95);
-  background: var(--color-expense);
   color: #fff;
 }
 

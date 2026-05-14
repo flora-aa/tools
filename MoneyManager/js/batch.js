@@ -127,9 +127,9 @@ function batchDelete() {
   selectedIds.clear();
   updateBatchCount();
 
-  showToast(`已删除 ${count} 笔`);
   requestAnimationFrame(() => {
     refreshAll();
+    showToast(`已删除 ${count} 笔`);
   });
 }
 
