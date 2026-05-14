@@ -14,9 +14,10 @@
 
 @supports (backdrop-filter: blur(1px)) {
   .batch-bar {
-    background: color-mix(in srgb, var(--bg-primary) 55%, transparent);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 6%, var(--bg-primary) 40%, transparent), color-mix(in srgb, var(--bg-primary) 35%, transparent));
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 0 0 0.5px color-mix(in srgb, var(--accent) 10%, transparent), 0 4px 24px rgba(0,0,0,0.3);
   }
 }
 
@@ -32,6 +33,7 @@
 
 .batch-bar-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
 }
 
@@ -51,7 +53,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-.btn-batch:active {
+.btn-batch:not(.btn-danger):active {
   transform: scale(0.95);
   background: var(--accent);
   color: #fff;
@@ -62,6 +64,7 @@
 }
 
 .btn-batch.btn-danger:active {
+  transform: scale(0.95);
   background: var(--color-expense);
   color: #fff;
 }

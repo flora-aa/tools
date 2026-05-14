@@ -67,13 +67,13 @@ function initOverlaySwipe(overlayEl) {
       overlayEl.style.transition = 'background 0.3s ease';
       overlayEl.style.background = 'rgba(0, 0, 0, 0)';
       setTimeout(() => {
-        closeAllOverlays();
         overlayEl.style.transition = '';
         panel.style.transition = '';
         panel.style.transform = '';
         panel.style.animation = '';
         overlayEl.style.background = '';
         panel.style.overflowY = '';
+        closeAllOverlays();
       }, 300);
     } else {
       panel.style.transform = 'translateY(0)';
@@ -98,10 +98,11 @@ function initOverlaySwipe(overlayEl) {
   panel.addEventListener('touchcancel', onTouchEnd, { passive: true });
 }
 
-function closeAllOverlays() {
+function forceHideAll() {
   ALL_OVERLAYS.forEach(id => {
     const el = document.getElementById(id);
     if (el) {
+      el.classList.remove('closing');
       void el.offsetHeight;
       el.style.display = 'none';
     }
@@ -111,9 +112,30 @@ function closeAllOverlays() {
   document.body.offsetHeight;
 }
 
+function closeAllOverlays() {
+  if (activeOverlay) {
+    const el = document.getElementById(activeOverlay);
+    if (el) {
+      const panel = el.querySelector('.panel');
+      if (panel) {
+        panel.style.transition = '';
+        panel.style.transform = '';
+        panel.style.animation = '';
+        panel.style.overflowY = '';
+      }
+      el.style.transition = '';
+      el.style.background = '';
+      el.classList.add('closing');
+      setTimeout(forceHideAll, 260);
+      return;
+    }
+  }
+  forceHideAll();
+}
+
 function openOverlay(id) {
   if (activeOverlay === id) return;
-  closeAllOverlays();
+  forceHideAll();
   const el = document.getElementById(id);
   if (el) {
     el.style.display = '';

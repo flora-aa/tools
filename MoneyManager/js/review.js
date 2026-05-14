@@ -200,6 +200,10 @@ function drawTrend(category) {
   });
 
   const maxVal = Math.max(...data.map(d => d.amount), 1);
+  const rootStyle = getComputedStyle(document.documentElement);
+  const accentColor = rootStyle.getPropertyValue('--accent').trim() || '#5a5aff';
+  const labelColor = rootStyle.getPropertyValue('--color-trend-label').trim() || '#8888aa';
+
   const padding = { top: 16, bottom: 20, left: 20, right: 20 };
   const chartW = cw - padding.left - padding.right;
   const chartH = ch - padding.top - padding.bottom;
@@ -208,7 +212,7 @@ function drawTrend(category) {
   ctx.clearRect(0, 0, cw, ch);
 
   if (data.every(d => d.amount === 0)) {
-    ctx.fillStyle = '#555577';
+    ctx.fillStyle = labelColor;
     ctx.font = '11px -apple-system, sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText('暂无历史数据', cw / 2, ch / 2 + 4);
@@ -222,7 +226,7 @@ function drawTrend(category) {
   }));
 
   ctx.beginPath();
-  ctx.strokeStyle = '#5a5aff';
+  ctx.strokeStyle = accentColor;
   ctx.lineWidth = 2;
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
@@ -234,14 +238,14 @@ function drawTrend(category) {
   points.forEach((p, i) => {
     ctx.beginPath();
     ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
-    ctx.fillStyle = '#5a5aff';
+    ctx.fillStyle = accentColor;
     ctx.fill();
     ctx.strokeStyle = '#0d0d1a';
     ctx.lineWidth = 1.5;
     ctx.stroke();
   });
 
-  ctx.fillStyle = '#8888aa';
+  ctx.fillStyle = labelColor;
   ctx.font = '10px -apple-system, sans-serif';
   data.forEach((d, i) => {
     const x = padding.left + i * stepX;
@@ -259,31 +263,15 @@ function drawTrend(category) {
     }
     ctx.fillText(d.label, lx, ch - 2);
   });
-
-  points.forEach((p, i) => {
-    if (data[i].amount > 0) {
-      ctx.fillStyle = '#f0f0f5';
-      ctx.font = '10px -apple-system, sans-serif';
-      const text = formatAmount(data[i].amount);
-      const textW = ctx.measureText(text).width;
-      const halfW = textW / 2;
-      let alignX = p.x;
-      if (p.x - halfW < 2) {
-        alignX = Math.max(p.x + halfW + 4, textW / 2 + 4);
-        ctx.textAlign = 'left';
-      } else if (p.x + halfW > cw - 2) {
-        alignX = Math.min(p.x - halfW - 4, cw - textW / 2 - 4);
-        ctx.textAlign = 'right';
-      } else {
-        ctx.textAlign = 'center';
-      }
-      ctx.fillText(text, alignX, p.y - 8);
-    }
-  });
 }
 
 function hideCategoryDetail() {
-  document.getElementById('reviewRank').style.display = '';
-  document.getElementById('reviewCategoryDetail').style.display = 'none';
-  renderReviewRank();
+  const detail = document.getElementById('reviewCategoryDetail');
+  detail.classList.add('closing');
+  setTimeout(() => {
+    detail.style.display = 'none';
+    detail.classList.remove('closing');
+    document.getElementById('reviewRank').style.display = '';
+    renderReviewRank();
+  }, 160);
 }

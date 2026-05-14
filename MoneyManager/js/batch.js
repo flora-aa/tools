@@ -128,7 +128,9 @@ function batchDelete() {
   updateBatchCount();
 
   showToast(`已删除 ${count} 笔`);
-  refreshAll();
+  requestAnimationFrame(() => {
+    refreshAll();
+  });
 }
 
 function batchInvert() {

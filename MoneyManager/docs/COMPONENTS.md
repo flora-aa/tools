@@ -52,6 +52,8 @@
 | `.btn-icon` | 图标按钮 | 圆形，40x40 |
 | `.btn-danger` | 危险操作 | 红色调 |
 | `.btn-success` | 成功操作 | 绿色调 |
+| `.btn-month` | 月份导航 | 圆形 36×36（桌面 40×40），内嵌 SVG 箭头，flex-shrink:0，active 时填充 accent |
+| `.btn-top-review` | 月度复盘入口 | 圆形 38×38（桌面 42×42），2×2 网格布局，bg-card 背景，active 时填充 accent |
 
 ---
 
@@ -60,7 +62,7 @@
 | Class | 用途 | 特征 |
 |---|---|---|
 | `.input` | 通用输入 | 标准圆角，边框 |
-| `.input-number` | 金额输入 | 大号字体，无上下箭头 |
+| `.input-number` | 金额输入 | 大号字体，无上下箭头（使用 `inputmode="decimal"` 替代 `type="number"`，支持 `=30.3-11.4` 类表达式） |
 | `.input-text` | 文本输入 | 标准文本输入 |
 
 ---
@@ -192,9 +194,13 @@
 
 ```html
 <div class="cal-header">
-  <button class="cal-nav" data-dir="-1">‹</button>
+  <button class="cal-month-btn" id="calPrevMonth">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+  </button>
   <span class="cal-month">2025年 1月</span>
-  <button class="cal-nav" data-dir="1">›</button>
+  <button class="cal-month-btn" id="calNextMonth">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+  </button>
 </div>
 <div class="cal-weekdays">
   <span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span><span>日</span>
@@ -207,6 +213,8 @@
   <button class="btn-primary" id="calConfirm">确定</button>
 </div>
 ```
+
+注：月份切换按钮使用 `cal-month-btn` 类（28×28 圆形，bg-card 背景，active 时填充 accent 色），代替原有的 `cal-nav` 文本字符按钮，避免字体渲染变形。
 
 ---
 
@@ -224,26 +232,58 @@
 </div>
 ```
 
-### 自定义颜色
+### 自定义颜色（取色面板）
+
+颜色选择改为卡片式按钮 + 弹出取色面板，替代原生 `<input type="color">`：
 
 ```html
-<div class="theme-custom-row">
-  <label>主题色</label>
-  <input type="color" id="customAccent">
+<div class="theme-color-btn" id="themeAccentBtn">
+  <span>主题色</span>
+  <div class="theme-color-preview" style="background: ..."></div>
 </div>
-<div class="theme-custom-row">
-  <label>背景色</label>
-  <input type="color" id="customBg">
+<div class="theme-color-btn" id="themeBgBtn">
+  <span>背景色</span>
+  <div class="theme-color-preview" style="background: ..."></div>
 </div>
-<div class="theme-custom-row">
-  <label>支出色</label>
-  <input type="color" id="customExpense">
+<div class="theme-color-btn" id="themeExpenseBtn">
+  <span>支出色</span>
+  <div class="theme-color-preview" style="background: ..."></div>
 </div>
-<div class="theme-custom-row">
-  <label>收入色</label>
-  <input type="color" id="customIncome">
+<div class="theme-color-btn" id="themeIncomeBtn">
+  <span>收入色</span>
+  <div class="theme-color-preview" style="background: ..."></div>
+</div>
+<div class="theme-color-btn" id="themeTextBtn">
+  <span>字体色</span>
+  <div class="theme-color-preview" style="background: ..."></div>
 </div>
 ```
+
+#### 取色面板
+
+```html
+<div class="color-swatch-panel" id="colorSwatchPanel">
+  <div class="color-swatch-header">
+    <span class="color-swatch-title" id="colorSwatchTitle">主题色</span>
+    <button class="color-swatch-close" id="colorSwatchClose">✕</button>
+  </div>
+  <div class="color-swatch-grid" id="colorSwatchGrid">
+    <!-- 6×4 颜色网格（24 色） -->
+  </div>
+  <div class="color-swatch-shade-row" id="colorSwatchShadeRow">
+    <div class="color-swatch-shades" id="colorSwatchShades">
+      <!-- 5 个深浅调节色块 -->
+    </div>
+    <span class="color-swatch-shade-hint">点击微调深浅</span>
+  </div>
+</div>
+```
+
+特征：
+- 24 色预置色盘（6×4 网格）：暗背景色、鲜艳强调色、现代艺术色、浅色亮色各一行
+- 点击色块即时应用并实时预览
+- 深浅微调条：5 级（更暗 40%/20%/当前/亮 20%/更亮 40%），基于当前色通过 darken()/lighten() 动态生成
+- 无 hex 输入框，全视觉化操作
 
 ---
 

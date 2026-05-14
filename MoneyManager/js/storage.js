@@ -28,6 +28,8 @@ function loadMemo() {
   if (input) {
     input.value = memo;
     updateMemoCount();
+    input.style.height = '';
+    input.style.height = Math.max(100, Math.min(input.scrollHeight, 400)) + 'px';
   }
 }
 

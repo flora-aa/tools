@@ -1,5 +1,19 @@
 /* === 月度复盘组件 === */
 
+@keyframes contentFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+#reviewSection {
+  animation: contentFadeIn 0.25s ease;
+}
+
+#formSection,
+#listSection {
+  animation: contentFadeIn 0.25s ease;
+}
+
 .review-section-title {
   display: flex;
   align-items: center;
@@ -48,7 +62,7 @@
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
-  padding: 4px 0;
+  padding: 8px 0;
 }
 
 .review-card.collapsible .review-card-header {
@@ -73,16 +87,69 @@
   padding: 0 16px 16px;
 }
 
-/* 分类详情头部 */
-.review-category-detail .review-card-header {
+#dayBudgetSection {
+  overflow: hidden;
+  transition: max-height 0.35s ease, opacity 0.25s ease, padding 0.25s ease;
+  max-height: 0;
+  opacity: 0;
+  padding: 0 16px;
+  box-sizing: content-box;
+}
+
+#dayBudgetSection.expanded {
+  max-height: 2000px;
+  opacity: 1;
+  padding: 12px 16px 16px;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(16px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutLeft {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-16px); opacity: 0; }
+}
+
+@keyframes fadeInUp {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* 分类详情卡片 */
+.review-category-detail {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
   padding: 16px;
+  animation: slideInRight 0.25s ease;
+}
+
+.review-category-detail.closing {
+  animation: slideOutLeft 0.15s ease forwards;
+}
+
+.review-category-detail .review-card-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 52px;
+  padding: 0 16px;
   border-bottom: 1px solid var(--border-color);
   margin: -16px -16px 0;
   width: calc(100% + 32px);
 }
 
-.review-category-detail .review-card-body {
-  padding: 16px;
+.review-category-detail .review-card-header .btn-ghost {
+  justify-self: start;
+}
+
+.review-category-detail .review-card-header .review-card-title {
+  justify-self: center;
+}
+
+.review-category-detail .review-card-header .review-card-count {
+  justify-self: end;
 }
 
 /* 支出统计网格 */
@@ -238,6 +305,7 @@
   align-items: center;
   padding: 10px 0;
   border-bottom: 1px solid var(--border-color);
+  animation: fadeInUp 0.2s ease both;
 }
 
 .review-category-item:last-child {
@@ -340,8 +408,40 @@
 
 .review-memo-footer {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
   margin-top: 6px;
+}
+
+.review-memo-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.btn-memo-height {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+  transition: transform 0.15s ease;
+  font-family: inherit;
+}
+
+.btn-memo-height:active {
+  transform: scale(0.9);
+  background: var(--bg-active);
 }
 
 .review-memo-count {
@@ -370,6 +470,14 @@
   max-width: calc(100vw - 32px);
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+@supports (backdrop-filter: blur(1px)) {
+  .toast {
+    background: color-mix(in srgb, var(--bg-card-alt) 78%, transparent);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
 }
 
 .toast.show {

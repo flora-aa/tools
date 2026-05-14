@@ -1,7 +1,92 @@
 function updateThemeColorBtn(btnId, color) {
   const btn = document.getElementById(btnId);
-  btn.style.background = color;
-  btn.style.color = getPureContrastColor(color);
+  const preview = btn.querySelector('.theme-color-preview');
+  if (preview) preview.style.background = color;
+}
+
+const COLOR_SWATCHES = [
+  // 第1行: 纯暗背景色 (深红→深橙→深黄→深绿→深蓝→深紫)
+  '#2d1a1a', '#2d1f1a', '#3d3510', '#1a2d1a', '#0d1a2d', '#1a1a2d',
+  // 第2行: 鲜艳强调色 (红→橙→黄→绿→蓝→紫)
+  '#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6',
+  // 第3行: 现代艺术色 (柔化/高级)
+  '#ff6b6b', '#ffa94d', '#ffd43b', '#38d9a9', '#74c0fc', '#b197fc',
+  // 第4行: 浅色亮色 (适合浅背景/浅色文字)
+  '#e9ecef', '#fff4e6', '#fff9db', '#e6fcf5', '#e7f5ff', '#f3f0ff',
+];
+
+let activeColorField = null;
+let themeColors = {};
+
+const COLOR_FIELDS = {
+  themeAccentBtn: { key: 'accent', label: '主题色' },
+  themeBgBtn: { key: 'bg', label: '背景色' },
+  themeExpenseBtn: { key: 'expense', label: '支出色' },
+  themeIncomeBtn: { key: 'income', label: '收入色' },
+  themeTextBtn: { key: 'text', label: '字体色' },
+};
+
+function renderShadeBar(baseColor) {
+  const shadeRow = document.getElementById('colorSwatchShadeRow');
+  const shadesContainer = document.getElementById('colorSwatchShades');
+  const shades = [
+    { level: -40, label: '更暗', color: darken(baseColor, 40) },
+    { level: -20, label: '暗', color: darken(baseColor, 20) },
+    { level: 0, label: '当前', color: baseColor },
+    { level: 20, label: '亮', color: lighten(baseColor, 20) },
+    { level: 40, label: '更亮', color: lighten(baseColor, 40) },
+  ];
+  shadesContainer.innerHTML = shades.map(s => `
+    <div class="color-swatch-shade ${s.level === 0 ? 'active' : ''}" style="background:${s.color};color:${s.color}" data-shade-color="${s.color}"></div>
+  `).join('');
+  shadeRow.style.display = '';
+}
+
+function openColorSwatch(fieldKey) {
+  const field = COLOR_FIELDS[fieldKey];
+  if (!field) return;
+  activeColorField = fieldKey;
+  const panel = document.getElementById('colorSwatchPanel');
+  const title = document.getElementById('colorSwatchTitle');
+  const grid = document.getElementById('colorSwatchGrid');
+  const currentColor = themeColors[field.key];
+
+  title.textContent = field.label;
+
+  document.querySelectorAll('.theme-color-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById(fieldKey).classList.add('active');
+
+  grid.innerHTML = COLOR_SWATCHES.map(c => `
+    <div class="color-swatch ${c === currentColor ? 'active' : ''}" style="background:${c};color:${c}" data-color="${c}"></div>
+  `).join('');
+
+  renderShadeBar(currentColor);
+  panel.style.display = '';
+}
+
+function closeColorSwatch() {
+  document.getElementById('colorSwatchPanel').style.display = 'none';
+  document.querySelectorAll('.theme-color-btn').forEach(el => el.classList.remove('active'));
+  activeColorField = null;
+}
+
+function applySwatchColor(color) {
+  if (!activeColorField) return;
+  const field = COLOR_FIELDS[activeColorField];
+  if (!field) return;
+
+  themeColors[field.key] = color;
+  updateThemeColorBtn(activeColorField, color);
+
+  document.querySelectorAll('.color-swatch').forEach(el => {
+    el.classList.toggle('active', el.dataset.color === color);
+  });
+
+  renderShadeBar(color);
+
+  applyTheme(themeColors);
+  renderThemePresets();
+  renderThemePreview();
 }
 
 function initThemePanel() {
@@ -9,16 +94,16 @@ function initThemePanel() {
     openOverlay('themeOverlay');
     const saved = localStorage.getItem('mm_theme');
     const currentTheme = saved ? JSON.parse(saved) : THEME_PRESETS[0];
-    document.getElementById('themeAccent').value = currentTheme.accent;
-    document.getElementById('themeBg').value = currentTheme.bg;
-    document.getElementById('themeExpense').value = currentTheme.expense;
-    document.getElementById('themeIncome').value = currentTheme.income;
+    themeColors = { ...currentTheme };
+    if (!themeColors.text) themeColors.text = getContrastColor(themeColors.bg);
     updateThemeColorBtn('themeAccentBtn', currentTheme.accent);
     updateThemeColorBtn('themeBgBtn', currentTheme.bg);
     updateThemeColorBtn('themeExpenseBtn', currentTheme.expense);
     updateThemeColorBtn('themeIncomeBtn', currentTheme.income);
-    originalTheme = { ...currentTheme };
-    themePreview = { ...currentTheme };
+    updateThemeColorBtn('themeTextBtn', themeColors.text);
+    originalTheme = { ...themeColors };
+    themePreview = { ...themeColors };
+    closeColorSwatch();
     renderThemePresets();
     renderThemePreview();
   });
@@ -29,6 +114,7 @@ function initThemePanel() {
     }
     themePreview = null;
     originalTheme = null;
+    closeColorSwatch();
     closeAllOverlays();
   });
 
@@ -39,6 +125,7 @@ function initThemePanel() {
       }
       themePreview = null;
       originalTheme = null;
+      closeColorSwatch();
       closeAllOverlays();
     }
   });
@@ -50,33 +137,36 @@ function initThemePanel() {
     }
     themePreview = null;
     originalTheme = null;
+    closeColorSwatch();
     closeAllOverlays();
   });
 
-  const accentInput = document.getElementById('themeAccent');
-  const bgInput = document.getElementById('themeBg');
-  const expenseInput = document.getElementById('themeExpense');
-  const incomeInput = document.getElementById('themeIncome');
+  Object.keys(COLOR_FIELDS).forEach(btnId => {
+    document.getElementById(btnId).addEventListener('click', (e) => {
+      if (e.target.closest('.color-swatch-close') || e.target.closest('.color-swatch-shade')) return;
+      if (activeColorField === btnId) {
+        closeColorSwatch();
+      } else {
+        openColorSwatch(btnId);
+      }
+    });
+  });
 
-  const updateThemePreview = () => {
-    themePreview = {
-      accent: accentInput.value,
-      bg: bgInput.value,
-      expense: expenseInput.value,
-      income: incomeInput.value
-    };
-    updateThemeColorBtn('themeAccentBtn', themePreview.accent);
-    updateThemeColorBtn('themeBgBtn', themePreview.bg);
-    updateThemeColorBtn('themeExpenseBtn', themePreview.expense);
-    updateThemeColorBtn('themeIncomeBtn', themePreview.income);
-    renderThemePreview();
-    renderThemePresets();
-  };
+  document.getElementById('colorSwatchClose').addEventListener('click', closeColorSwatch);
 
-  accentInput.addEventListener('input', updateThemePreview);
-  bgInput.addEventListener('input', updateThemePreview);
-  expenseInput.addEventListener('input', updateThemePreview);
-  incomeInput.addEventListener('input', updateThemePreview);
+  document.getElementById('colorSwatchGrid').addEventListener('click', (e) => {
+    const swatch = e.target.closest('.color-swatch');
+    if (swatch) {
+      applySwatchColor(swatch.dataset.color);
+    }
+  });
+
+  document.getElementById('colorSwatchShades').addEventListener('click', (e) => {
+    const shade = e.target.closest('.color-swatch-shade');
+    if (shade) {
+      applySwatchColor(shade.dataset.shadeColor);
+    }
+  });
 }
 
 function renderThemePreview() {
@@ -88,7 +178,8 @@ function renderThemePreview() {
   const isCustom = themePreview.accent !== currentTheme.accent ||
                    themePreview.bg !== currentTheme.bg ||
                    themePreview.expense !== currentTheme.expense ||
-                   themePreview.income !== currentTheme.income;
+                   themePreview.income !== currentTheme.income ||
+                   (themePreview.text || getContrastColor(themePreview.bg)) !== (currentTheme.text || getContrastColor(currentTheme.bg));
 
   if (isCustom) {
     container.innerHTML = `
@@ -128,6 +219,7 @@ function saveTheme() {
     bg: getComputedStyle(root).getPropertyValue('--bg-primary').trim(),
     expense: getComputedStyle(root).getPropertyValue('--color-expense').trim(),
     income: getComputedStyle(root).getPropertyValue('--color-income').trim(),
+    text: getComputedStyle(root).getPropertyValue('--text-primary').trim(),
     btnTopReviewColor: getComputedStyle(root).getPropertyValue('--btn-top-review-color').trim()
   };
   localStorage.setItem('mm_theme', JSON.stringify(theme));
@@ -187,7 +279,7 @@ function applyTheme(theme) {
   const accent = theme.accent || '#5a5aff';
   const expense = theme.expense || lighten(accent, 30);
   const income = theme.income || '#27ae60';
-  const textColor = getContrastColor(bg);
+  const textColor = theme.text || getContrastColor(bg);
   const secondaryColor = getSecondaryColor(bg);
   const mutedColor = getMutedColor(bg);
   const disabledColor = getDisabledColor(bg);
@@ -275,8 +367,16 @@ function renderThemePresets() {
     return saved ? JSON.parse(saved) : THEME_PRESETS[0];
   })();
 
-  container.innerHTML = THEME_PRESETS.map(preset => `
-    <div class="theme-preset ${preset.accent === previewTheme.accent && preset.bg === previewTheme.bg && preset.expense === previewTheme.expense && preset.income === previewTheme.income ? 'active' : ''}" data-preset="${preset.name}">
+  container.innerHTML = THEME_PRESETS.map(preset => {
+    const presetText = preset.text || getContrastColor(preset.bg);
+    const previewText = previewTheme.text || getContrastColor(previewTheme.bg);
+    const isActive = preset.accent === previewTheme.accent &&
+      preset.bg === previewTheme.bg &&
+      preset.expense === previewTheme.expense &&
+      preset.income === previewTheme.income &&
+      presetText === previewText;
+    return `
+    <div class="theme-preset ${isActive ? 'active' : ''}" data-preset="${preset.name}">
       <div class="theme-preset-preview" style="background: ${preset.bg}">
         <div class="theme-preset-accent" style="background: ${preset.accent}"></div>
         <div class="theme-preset-expense" style="background: ${preset.expense}"></div>
@@ -284,21 +384,21 @@ function renderThemePresets() {
       </div>
       <span class="theme-preset-name">${preset.name}</span>
     </div>
-  `).join('');
+  `}).join('');
 
   container.querySelectorAll('.theme-preset').forEach(el => {
     el.addEventListener('click', () => {
       const preset = THEME_PRESETS.find(p => p.name === el.dataset.preset);
       if (preset) {
-        document.getElementById('themeAccent').value = preset.accent;
-        document.getElementById('themeBg').value = preset.bg;
-        document.getElementById('themeExpense').value = preset.expense;
-        document.getElementById('themeIncome').value = preset.income;
+        themeColors = { ...preset };
+        themeColors.text = preset.text || getContrastColor(preset.bg);
         updateThemeColorBtn('themeAccentBtn', preset.accent);
         updateThemeColorBtn('themeBgBtn', preset.bg);
         updateThemeColorBtn('themeExpenseBtn', preset.expense);
         updateThemeColorBtn('themeIncomeBtn', preset.income);
-        themePreview = { ...preset };
+        updateThemeColorBtn('themeTextBtn', themeColors.text);
+        themePreview = { ...themeColors };
+        closeColorSwatch();
         renderThemePresets();
         renderThemePreview();
       }

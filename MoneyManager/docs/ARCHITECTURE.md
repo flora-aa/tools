@@ -2,12 +2,12 @@
 
 ## 整体架构
 
-MoneyManager 是一个纯前端单页应用（SPA），采用 MVC 风格的代码组织：
+MoneyManager 是一个纯前端单页应用（SPA），采用模块化代码组织：
 
 ```
 index.html  →  视图模板（DOM 结构）
-style.css   →  样式系统（CSS 变量 + 组件样式）
-script.js   →  控制器 + 模型（数据管理、UI 渲染、事件绑定）
+css/*.css   →  样式系统（9 个 CSS 文件：base, components, overlay, theme, review, budget, batch, data, dual）
+js/*.js     →  控制器 + 模型（19 个 JS 模块：main, data, calendar, quick, edit, review, budget, theme, overlay, inherit, utils, constants, categories, state, storage, transaction, list, batch, heatmap）
 ```
 
 所有数据持久化在浏览器的 `localStorage` 中，无后端依赖。
@@ -35,7 +35,8 @@ script.js   →  控制器 + 模型（数据管理、UI 渲染、事件绑定）
 | 数据管理 | `dataOverlay` | 底部弹出 | 显示累计支出，提供清除本月/全部数据、进入主题设置 |
 | 预算设置 | `budgetOverlay` | 底部弹出 | 设置月度预算金额、目标、工作模式 |
 | 日历选择 | `calendarOverlay` | 居中模态 | 自定义日期选择器 |
-| 主题设置 | `themeOverlay` | 底部弹出 | 8 套预设主题 + 4 个自定义颜色选择器 |
+| 主题设置 | `themeOverlay` | 底部弹出 | 8 套预设主题 + 5 个自定义颜色按钮（含字体色）+ 24 色取色面板 + 深浅微调条 |
+| 数据继承 | `inheritOverlay` | 底部弹出 | GitHub Gist 导入/导出，AES-GCM 加密 |
 
 ---
 
@@ -110,28 +111,30 @@ let transactions = [];  // 所有账单记录
 | Key | 格式 | 用途 |
 |---|---|---|
 | `mm_transactions` | `Transaction[]` JSON | 所有账单记录 |
-| `mm_theme` | `{ accent, bg, expense, income }` | 主题配置 |
+| `mm_theme` | `{ accent, bg, expense, income, text, btnTopReviewColor }` | 主题配置 |
 | `mm_budgets` | `{ "YYYY-MM": { amount, target, workMode, excludeIds } }` | 月度预算 |
 | `mm_lastAmounts` | `{ "分类": 金额 }` | 各分类上次记录金额 |
 | `mm_memo_YYYY_MM` | 纯文本 | 月度小结内容 |
 
 ### 核心函数分类
 
-**数据层**：`loadData()`、`saveData()`、`getBudgetMonthSpent()`
+**数据层**：`loadData()`（data.js）、`saveData()`（data.js）、`getBudgetMonthSpent()`（budget.js）
 
-**日期处理**：`getTodayDate()`、`formatDateDisplay()`、`formatDateLabel()`、`prevMonth()`、`nextMonth()`
+**日期处理**：`getTodayDate()`（utils.js）、`formatDateDisplay()`、`formatDateLabel()`（calendar.js）、`prevMonth()`、`nextMonth()`（data.js）
 
-**UI 渲染**：`renderList()`、`renderReview()`、`renderBudgetOverview()`、`renderDayBudgetList()`
+**UI 渲染**：`renderList()`（edit.js）、`renderReview()`（review.js）、`renderBudgetOverview()`、`renderDayBudgetList()`（budget.js）
 
-**Overlay 管理**：`openOverlay(id)`、`closeAllOverlays()`、`ALL_OVERLAYS`
+**Overlay 管理**：`openOverlay(id)`、`closeAllOverlays()`（overlay.js）
 
-**主题系统**：`applyTheme(theme)`、`getLuminance(hex)`、`getContrastColor(bgHex)`、`lighten(hex, percent)`、`darken(hex, percent)`、`hexToRgba(hex, alpha)`
+**主题系统**：`applyTheme(theme)`、`getLuminance(hex)`、`getContrastColor(bgHex)`、`lighten(hex, percent)`、`darken(hex, percent)`、`hexToRgba(hex, alpha)`（theme.js）
 
-**预算算法**：`getDailyBudget(year, month, day)`、`getDayStatus(budget, actual)`、`getDayHeatLevel(dailyBudget, actualSpent)`
+**预算算法**：`getDailyBudget(year, month, day)`、`getDayStatus(budget, actual)`、`getDayHeatLevel(dailyBudget, actualSpent)`（budget.js）
 
-**批量操作**：`toggleSelectMode()`、`toggleSelectItem(id)`、`batchDelete()`、`batchInvert()`、`batchChangeCategory()`、`batchChangeDate()`
+**批量操作**：`toggleSelectMode()`、`toggleSelectItem(id)`、`batchDelete()`、`batchInvert()`、`batchChangeCategory()`、`batchChangeDate()`（edit.js）
 
-**快速记账**：`openQuickPanel()`、`quickSubmit(category)`
+**快速记账**：`openQuickPanel()`、`quickSubmit(category)`（quick.js）
+
+**数据继承**：`exportToGist()`、`importFromGist()`、`encryptData()`、`decryptData()`（inherit.js）
 
 ### 双页模式
 

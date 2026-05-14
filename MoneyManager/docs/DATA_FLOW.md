@@ -37,6 +37,7 @@
   bg: string,           // 背景色 hex
   expense: string,      // 支出色 hex
   income: string,       // 收入色 hex
+  text: string,         // 字体色 hex（可选，回退 getContrastColor(bg)）
   btnTopReviewColor: string  // 复盘按钮颜色（可选）
 }
 ```
@@ -104,7 +105,8 @@
 
 ```
 applyTheme(theme):
-  → 根据 bg 亮度计算文字色、卡片色、输入框色
+  → 根据 bg 亮度计算卡片色、输入框色
+  → 使用 theme.text（或根据 bg 计算对比色）设置字体色
   → 生成 accent 的 alpha 变体
   → root.style.setProperty() 设置所有 CSS 变量
   → 保存到 localStorage mm_theme

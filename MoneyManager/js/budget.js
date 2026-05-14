@@ -209,7 +209,8 @@ function renderBudgetOverview() {
 
   const todayStatusEl = document.getElementById('budgetTodayStatus');
   if (effectiveBudget > 0 && isCurrentMonth) {
-    document.getElementById('budgetTodayValue').textContent = formatAmount(todayDailyBudget);
+    const remainingToday = todayDailyBudget - todaySpent;
+    document.getElementById('budgetTodayValue').textContent = remainingToday >= 0 ? formatAmount(remainingToday) : '已超出预算';
     const status = getDayStatus(todayDailyBudget, todaySpent);
     const statusInfo = getDayStatusLabel(status);
     todayStatusEl.textContent = statusInfo.text;
@@ -347,10 +348,10 @@ function toggleDayBudget() {
   const toggle = document.getElementById('dayBudgetToggle');
 
   if (isDayBudgetExpanded) {
-    section.style.display = '';
+    section.classList.add('expanded');
     card.classList.remove('collapsed');
   } else {
-    section.style.display = 'none';
+    section.classList.remove('expanded');
     card.classList.add('collapsed');
   }
 }

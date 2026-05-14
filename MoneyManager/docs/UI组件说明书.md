@@ -122,11 +122,41 @@
 - 悬停态：背景变bg-hover，文字变text-primary
 - 激活态：背景变bg-active
 
-### .btn-icon - 图标按钮
-圆形图标按钮，用于导航/切换（如月份切换、关闭）。
+### .btn-month - 月导航按钮
+圆形无边框按钮，内嵌 SVG 箭头图标，用于月份切换。
 
 ```html
-<button class="btn-icon">‹</button>
+<button class="btn-month" id="btnPrevMonth">
+  <svg width="10" height="16" viewBox="0 0 10 16"><path d="M8 2L2 8l6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+```
+
+**样式：**
+- 尺寸：32x32px
+- 背景：bg-card
+- 圆角：radius-full (圆形)
+- 激活态：scale(0.9) + accent 填充 + 白色箭头
+- SVG：display: block，消除行内间隙
+
+### .btn-top-review - 月度复盘按钮
+圆形按钮，4 字（"月度复盘"）以 2×2 网格排列。
+
+```html
+<button class="btn-top-review"><span>月</span><span>度</span><span>复</span><span>盘</span></button>
+```
+
+**样式：**
+- 尺寸：38×38px（桌面 42×42，紧凑 34×34）
+- 背景：bg-card（选中时 accent 填充）
+- 圆角：radius-full
+- 布局：grid 2×2，字号 10px，字重 600
+- 激活态：scale(0.9) + accent 填充 + 白色字
+
+### .btn-icon - 图标按钮
+圆形图标按钮，用于导航/切换（如关闭）。
+
+```html
+<button class="btn-icon">×</button>
 <button class="btn-icon btn-icon-sm">×</button>
 ```
 
@@ -153,7 +183,7 @@
 ### .input - 输入框基础
 ```html
 <input type="text" class="input input-text" placeholder="备注">
-<input type="number" class="input input-number" placeholder="0.00">
+<input type="text" class="input input-number" id="inputAmount" placeholder="0.00" inputmode="decimal">
 ```
 
 **基础样式：**
@@ -256,11 +286,19 @@
 | 玫瑰粉 | #ff2d55 | #ff6b6b | #4ecdc4 | #ffcc02 |
 
 ### 自定义颜色
-支持4个可自定义颜色：
-- 主色调 (accent)
+支持 5 个可自定义颜色：
+- 主题色 (accent)
+- 背景色 (bg)
 - 支出色 (expense)
 - 收入色 (income)
-- 警示色 (warn)
+- 字体色 (text)
+
+### 选色交互
+1. 点击颜色按钮（如"主题色"），展开色板面板
+2. 面板顶部显示标题 + "完成"按钮
+3. 中间为 6×4 色板网格（24 色调色盘，4 行按功能分组）
+4. 底部为深浅微调条：点击色块后展示 5 档明度（更暗40%/暗20%/当前/亮20%/更亮40%）
+5. 点击色块或微调色块，颜色立即应用至预览
 
 ### JS API
 ```javascript

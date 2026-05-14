@@ -112,12 +112,50 @@ document.addEventListener('DOMContentLoaded', () => {
     if (e.key === 'Enter') addTransaction();
   });
 
+  document.getElementById('inputAmount').addEventListener('input', (e) => {
+    const val = e.target.value.trim();
+    if (val.startsWith('=')) {
+      const expr = val.slice(1);
+      if (/^[\d+\-*/.()]+$/.test(expr)) {
+        try {
+          const result = new Function(`return (${expr})`)();
+          if (typeof result === 'number' && isFinite(result) && result > 0) {
+            e.target.value = result.toFixed(2);
+          }
+        } catch {
+          /* incomplete expression, wait for more input */
+        }
+      }
+    }
+  });
+
   const memoInput = document.getElementById('memoInput');
   if (memoInput) {
+    const MIN_MEMO_HEIGHT = 100;
+    const MAX_MEMO_HEIGHT = 400;
+    const STEP = 40;
+
     memoInput.addEventListener('input', () => {
       updateMemoCount();
       saveMemo();
+      memoInput.style.height = '';
+      const scrollH = memoInput.scrollHeight;
+      const clamped = Math.max(MIN_MEMO_HEIGHT, Math.min(scrollH, MAX_MEMO_HEIGHT));
+      memoInput.style.height = clamped + 'px';
     });
+
+    const btnGrow = document.getElementById('btnMemoGrow');
+    const btnShrink = document.getElementById('btnMemoShrink');
+    if (btnGrow && btnShrink) {
+      btnGrow.addEventListener('click', () => {
+        const cur = parseInt(memoInput.style.height) || memoInput.scrollHeight || MIN_MEMO_HEIGHT;
+        memoInput.style.height = Math.min(cur + STEP, MAX_MEMO_HEIGHT) + 'px';
+      });
+      btnShrink.addEventListener('click', () => {
+        const cur = parseInt(memoInput.style.height) || memoInput.scrollHeight || MIN_MEMO_HEIGHT;
+        memoInput.style.height = Math.max(cur - STEP, MIN_MEMO_HEIGHT) + 'px';
+      });
+    }
   }
 
   populateCategories();

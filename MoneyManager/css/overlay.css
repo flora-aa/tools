@@ -9,6 +9,13 @@
   animation: fadeIn 0.2s ease;
 }
 
+@supports (backdrop-filter: blur(1px)) {
+  .overlay {
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+  }
+}
+
 body.overlay-open .app {
   overflow: hidden;
 }
@@ -36,12 +43,16 @@ body.overlay-open .app {
   max-height: 45vh;
   will-change: transform;
   overflow-y: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
 }
 
-.panel::-webkit-scrollbar {
-  display: none;
+@supports (backdrop-filter: blur(1px)) {
+  .panel {
+    background: linear-gradient(135deg,
+      color-mix(in srgb, var(--bg-card) 78%, transparent),
+      color-mix(in srgb, var(--bg-card-alt) 65%, transparent));
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+  }
 }
 
 .overlay.panel-modal .panel {
@@ -59,6 +70,33 @@ body.overlay-open .app {
 
 .calendar-panel .panel-header {
   margin-bottom: 10px;
+}
+
+.cal-month-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.cal-month-btn svg {
+  display: block;
+}
+
+.cal-month-btn:active {
+  transform: scale(0.9);
+  background: var(--accent);
+  color: #fff;
 }
 
 .calendar-panel .panel-title {
@@ -118,23 +156,47 @@ body.overlay-open .app {
   }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes slideDown {
+  from { transform: translateY(0); }
+  to { transform: translateY(100%); }
+}
+
+@keyframes scaleOut {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(0.92); opacity: 0; }
+}
+
 @keyframes scaleIn {
-  from {
-    transform: scale(0.92);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
 
-.panel::-webkit-scrollbar {
-  width: 3px;
+.overlay.closing {
+  animation: fadeOut 0.2s ease forwards;
+  pointer-events: none;
 }
 
-.panel::-webkit-scrollbar-track {
-  background: transparent;
+.overlay.closing .panel {
+  animation: slideDown 0.25s ease forwards;
+}
+
+.overlay.panel-modal.closing .panel {
+  animation: scaleOut 0.2s ease forwards;
 }
 
 .panel-header {

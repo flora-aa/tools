@@ -22,15 +22,19 @@
 
     <header class="top-bar">
       <div class="top-bar-left">
-        <button class="btn-month" id="btnPrevMonth">‹</button>
+        <button class="btn-month" id="btnPrevMonth">
+          <svg width="10" height="16" viewBox="0 0 10 16"><path d="M8 2L2 8l6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
         <span class="month-label" id="monthLabel">2026年5月</span>
-        <button class="btn-month" id="btnNextMonth">›</button>
+        <button class="btn-month" id="btnNextMonth">
+          <svg width="10" height="16" viewBox="0 0 10 16"><path d="M2 2l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
       <div class="top-bar-right">
         <span class="month-expense-label">支出</span>
         <span class="month-expense-value" id="monthExpense">¥0.00</span>
       </div>
-      <button class="btn-top-review" id="btnTopReview">月度复盘</button>
+      <button class="btn-top-review" id="btnTopReview"><span>月</span><span>度</span><span>复</span><span>盘</span></button>
     </header>
 
     <main class="main-content">
@@ -40,7 +44,7 @@
       <section class="form-section" id="formSection">
         <div class="amount-group">
           <span class="currency-sign">¥</span>
-          <input type="number" id="inputAmount" class="amount-input" placeholder="0.00" step="0.01" min="0" inputmode="decimal" autocomplete="off" name="amount" form="dummy-form" autofocus>
+          <input type="text" id="inputAmount" class="amount-input" placeholder="0.00" inputmode="decimal" autocomplete="off" name="amount" autofocus>
         </div>
         <div class="category-grid" id="categoryGrid"></div>
         <div class="form-row">
@@ -75,7 +79,7 @@
       <section class="list-section" id="listSection">
         <div class="today-budget-bar" id="todayBudgetBar">
           <div class="today-budget-left">
-            <span class="today-budget-label">当日可用</span>
+            <span class="today-budget-label">当日预算</span>
             <span class="today-budget-value" id="todayBudgetValue">¥0.00</span>
           </div>
           <div class="today-budget-right">
@@ -133,7 +137,7 @@
               <div class="budget-progress-bar" id="budgetProgressBar"></div>
             </div>
             <div class="budget-today-row">
-              <span class="budget-today-label">当日可用</span>
+              <span class="budget-today-label">当日还剩</span>
               <span class="budget-today-value" id="budgetTodayValue">¥0.00</span>
               <span class="budget-today-status" id="budgetTodayStatus"></span>
             </div>
@@ -148,7 +152,7 @@
           <div class="review-card-header" id="dayBudgetToggle">
             <span class="review-card-title">每日预算追踪</span>
           </div>
-          <div class="review-card-body" id="dayBudgetSection" style="display:none">
+          <div class="review-card-body" id="dayBudgetSection">
             <div class="day-budget-list" id="dayBudgetList"></div>
           </div>
         </div>
@@ -208,8 +212,12 @@
             <span class="review-card-title">月度小结</span>
           </div>
           <div class="review-card-body">
-            <textarea class="review-memo-input" id="memoInput" placeholder="这个月花了哪些不该花的钱？下个月有什么预算计划？写下你的思考..." maxlength="500"></textarea>
+            <textarea class="review-memo-input" id="memoInput" placeholder="这个月花了哪些不该花的钱？下个月有什么预算计划？写下你的思考..." maxlength="500" rows="4"></textarea>
             <div class="review-memo-footer">
+              <div class="review-memo-actions">
+                <button class="btn-memo-height" id="btnMemoShrink" title="减小高度">−</button>
+                <button class="btn-memo-height" id="btnMemoGrow" title="增加高度">+</button>
+              </div>
               <span class="review-memo-count" id="memoCount">0/500</span>
             </div>
           </div>
@@ -445,9 +453,13 @@
   <div class="overlay panel-modal" id="calendarOverlay" style="display:none">
     <div class="panel calendar-panel">
       <div class="panel-header">
-        <button class="btn-icon" id="calPrevMonth">‹</button>
+        <button class="cal-month-btn" id="calPrevMonth">
+          <svg width="8" height="12" viewBox="0 0 10 16"><path d="M8 2L2 8l6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
         <span class="panel-title" id="calTitle"></span>
-        <button class="btn-icon" id="calNextMonth">›</button>
+        <button class="cal-month-btn" id="calNextMonth">
+          <svg width="8" height="12" viewBox="0 0 10 16"><path d="M2 2l6 6-6 6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
       </div>
       <div class="panel-body">
         <div class="cal-weekdays">
@@ -475,20 +487,35 @@
         <div class="theme-custom">
         <label class="theme-color-btn" id="themeAccentBtn">
           <span class="theme-color-label">主题色</span>
-          <input type="color" id="themeAccent" value="#5a5aff">
+          <span class="theme-color-preview"></span>
         </label>
         <label class="theme-color-btn" id="themeBgBtn">
           <span class="theme-color-label">背景色</span>
-          <input type="color" id="themeBg" value="#0d0d1a">
+          <span class="theme-color-preview"></span>
         </label>
         <label class="theme-color-btn" id="themeExpenseBtn">
           <span class="theme-color-label">支出色</span>
-          <input type="color" id="themeExpense" value="#ff4757">
+          <span class="theme-color-preview"></span>
         </label>
         <label class="theme-color-btn" id="themeIncomeBtn">
           <span class="theme-color-label">收入色</span>
-          <input type="color" id="themeIncome" value="#2ecc71">
+          <span class="theme-color-preview"></span>
         </label>
+        <label class="theme-color-btn" id="themeTextBtn">
+          <span class="theme-color-label">字体色</span>
+          <span class="theme-color-preview"></span>
+        </label>
+      </div>
+      <div class="color-swatch-panel" id="colorSwatchPanel" style="display:none">
+        <div class="color-swatch-header">
+          <span class="color-swatch-title" id="colorSwatchTitle">主题色</span>
+          <button class="color-swatch-close" id="colorSwatchClose">完成</button>
+        </div>
+        <div class="color-swatch-grid" id="colorSwatchGrid"></div>
+        <div class="color-swatch-shade-row" id="colorSwatchShadeRow" style="display:none">
+          <div class="color-swatch-shades" id="colorSwatchShades"></div>
+          <span class="color-swatch-shade-hint">点击微调深浅</span>
+        </div>
       </div>
         <div class="theme-custom-preview" id="themeCustomPreview" style="display:none"></div>
       </div>

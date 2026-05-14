@@ -81,23 +81,23 @@
 }
 
 .budget-today-status.great {
-  color: #34c759;
-  background: rgba(52, 199, 89, 0.15);
+  color: var(--color-status-great);
+  background: var(--color-status-great-bg);
 }
 
 .budget-today-status.good {
-  color: #30d158;
-  background: rgba(48, 209, 88, 0.15);
+  color: var(--color-status-good);
+  background: var(--color-status-good-bg);
 }
 
 .budget-today-status.warn {
-  color: #ff9500;
-  background: rgba(255, 149, 0, 0.15);
+  color: var(--color-status-warn);
+  background: var(--color-status-warn-bg);
 }
 
 .budget-today-status.over {
-  color: #ff3b30;
-  background: rgba(255, 59, 48, 0.15);
+  color: var(--color-status-over);
+  background: var(--color-status-over-bg);
 }
 
 .budget-today-status.empty {
@@ -228,19 +228,19 @@
 }
 
 .day-budget-row.heat-1 {
-  background: rgba(46, 204, 113, 0.15);
+  background: var(--color-income-alpha-15);
 }
 
 .day-budget-row.heat-2 {
-  background: rgba(46, 204, 113, 0.25);
+  background: var(--color-income-alpha-25);
 }
 
 .day-budget-row.heat-3 {
-  background: rgba(255, 193, 7, 0.25);
+  background: var(--color-warn-alpha-25);
 }
 
 .day-budget-row.heat-4 {
-  background: rgba(255, 71, 87, 0.25);
+  background: var(--color-expense-alpha-25);
 }
 
 .day-budget-row.heat-4 .day-budget-actual {
