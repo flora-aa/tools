@@ -179,6 +179,8 @@
   cursor: pointer;
   transition: all 0.15s ease;
   position: relative;
+  justify-self: center;
+  align-self: center;
 }
 
 .color-swatch:active {
@@ -248,4 +250,44 @@
 
 .btn-theme {
   font-size: 18px;
+}
+
+/* 桌面/平板端缩小色板尺寸 */
+@media (min-width: 768px) {
+  .color-swatch-panel {
+    padding: 12px;
+  }
+
+  .color-swatch-grid {
+    grid-template-columns: repeat(6, minmax(0, 44px));
+    justify-content: safe center;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .color-swatch {
+    border-width: 1.5px;
+  }
+
+  .color-swatch.active {
+    box-shadow: 0 0 0 1.5px var(--bg-card-alt), 0 0 0 3px currentColor;
+  }
+
+  .color-swatch-shade {
+    width: 26px;
+    height: 26px;
+    border-width: 1.5px;
+  }
+
+  .color-swatch-shade.active {
+    box-shadow: 0 0 0 1.5px var(--bg-card-alt), 0 0 0 3px currentColor;
+  }
+
+  .color-swatch-shades {
+    gap: 6px;
+  }
+
+  .color-swatch-shade-hint {
+    font-size: 10px;
+  }
 }

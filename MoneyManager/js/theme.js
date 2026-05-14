@@ -76,6 +76,7 @@ function applySwatchColor(color) {
   if (!field) return;
 
   themeColors[field.key] = color;
+  if (themePreview) themePreview[field.key] = color;
   updateThemeColorBtn(activeColorField, color);
 
   document.querySelectorAll('.color-swatch').forEach(el => {
@@ -242,19 +243,19 @@ function getPureContrastColor(bgHex) {
   return luminance > 0.4 ? '#000000' : '#ffffff';
 }
 
-function getSecondaryColor(bgHex) {
-  const luminance = getLuminance(bgHex);
-  return luminance > 0.4 ? '#636366' : '#a1a1a6';
+function getSecondaryColor(baseColor) {
+  const luminance = getLuminance(baseColor);
+  return luminance > 0.5 ? darken(baseColor, 31) : lighten(baseColor, 29);
 }
 
-function getMutedColor(bgHex) {
-  const luminance = getLuminance(bgHex);
-  return luminance > 0.4 ? '#8e8e93' : '#636366';
+function getMutedColor(baseColor) {
+  const luminance = getLuminance(baseColor);
+  return luminance > 0.5 ? darken(baseColor, 57) : lighten(baseColor, 45);
 }
 
-function getDisabledColor(bgHex) {
-  const luminance = getLuminance(bgHex);
-  return luminance > 0.4 ? '#c7c7cc' : '#48484a';
+function getDisabledColor(baseColor) {
+  const luminance = getLuminance(baseColor);
+  return luminance > 0.5 ? darken(baseColor, 69) : lighten(baseColor, 68);
 }
 
 function lighten(hex, percent) {
@@ -280,9 +281,9 @@ function applyTheme(theme) {
   const expense = theme.expense || lighten(accent, 30);
   const income = theme.income || '#27ae60';
   const textColor = theme.text || getContrastColor(bg);
-  const secondaryColor = getSecondaryColor(bg);
-  const mutedColor = getMutedColor(bg);
-  const disabledColor = getDisabledColor(bg);
+  const secondaryColor = getSecondaryColor(textColor);
+  const mutedColor = getMutedColor(textColor);
+  const disabledColor = getDisabledColor(textColor);
 
   const luminance = getLuminance(bg);
   const isLight = luminance > 0.4;
